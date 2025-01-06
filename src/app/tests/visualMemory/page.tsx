@@ -42,7 +42,7 @@ export default function VisualMemoryTest() {
   const tilesToRemember = Math.min(3 + level, gridSize * gridSize - 1)
 
   const generateSequence = () => {
-    const newSequence = []
+    const newSequence: number[] = []
     while (newSequence.length < tilesToRemember) {
       const num = Math.floor(Math.random() * (gridSize * gridSize))
       if (!newSequence.includes(num)) newSequence.push(num)
