@@ -34,7 +34,7 @@ export default function ReflexTest() {
   const [tooEarly, setTooEarly] = useState<boolean>(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
   const resetTest = () => {
