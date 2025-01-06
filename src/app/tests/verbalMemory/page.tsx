@@ -7,7 +7,13 @@ import Link from 'next/link';
 const MOTS_FRANCAIS = [
   'maison', 'voiture', 'chat', 'chien', 'table', 'livre', 'arbre', 'soleil',
   'lune', 'étoile', 'fleur', 'oiseau', 'pain', 'eau', 'café', 'musique',
-  'temps', 'amour', 'travail', 'famille', 'ami', 'ville', 'pays', 'monde'
+  'temps', 'amour', 'travail', 'famille', 'ami', 'ville', 'pays', 'monde',
+  'jardin', 'école', 'plage', 'montagne', 'cuisine', 'téléphone', 'ordinateur', 'fenêtre',
+  'porte', 'route', 'train', 'avion', 'vélo', 'radio', 'journal', 'lettre',
+  'histoire', 'film', 'photo', 'danse', 'chanson', 'pluie', 'neige', 'vent',
+  'forêt', 'mer', 'rivière', 'lac', 'nuage', 'orage', 'matin', 'soir',
+  'nuit', 'hiver', 'été', 'printemps', 'automne', 'fruit', 'légume', 'viande',
+  'poisson', 'fromage', 'gâteau', 'chocolat', 'sucre', 'sel', 'restaurant', 'hôtel'
 ];
 
 export default function VerbalMemoryTest() {
@@ -38,16 +44,15 @@ export default function VerbalMemoryTest() {
     
     if ((dejaVu && estEffectivementDejaVu) || (!dejaVu && !estEffectivementDejaVu)) {
       setScore(prev => prev + 1);
+      if (!estEffectivementDejaVu) {
+        setMotsDejaProposes(prev => new Set(prev).add(motCourant));
+      }
     } else {
       setVies(prev => prev - 1);
       if (vies <= 1) {
         setGameStatus('gameover');
         return;
       }
-    }
-    
-    if (!estEffectivementDejaVu) {
-      setMotsDejaProposes(prev => new Set(prev).add(motCourant));
     }
     
     choisirNouveauMot();
