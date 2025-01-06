@@ -36,6 +36,12 @@ const capacityTests = [
     description: "Défiez les chimpanzés dans ce test de mémoire de travail",
     image: "/chimp.svg",
     link: "/tests/chimpTest"
+  },
+  {
+    title: "Mémoire des Symboles",
+    description: "Retrouvez les paires de symboles cachés",
+    image: "/symbol.svg",
+    link: "/tests/symbolMemory"
   }
 ];
 
