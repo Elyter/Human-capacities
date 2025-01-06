@@ -129,7 +129,62 @@ export default function SymbolMemoryTest() {
     }, 5000);
   };
 
-  // ... Ajoutez ici les fonctions fetchResults, saveResult, prepareChartData comme dans les autres jeux
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/symbolMemory');
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des résultats:', error);
+    }
+  };
+
+  const saveResult = async (score: number) => {
+    try {
+      await fetch('/api/symbolMemory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ score }),
+      });
+      fetchResults();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+    }
+  };
+
+  const prepareChartData = () => {
+    return {
+      labels: results.map((_, i) => `Partie ${i + 1}`),
+      datasets: [
+        {
+          label: 'Niveau atteint',
+          data: results.map((r: { score: number }) => r.score),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.3,
+          fill: false,
+        },
+      ],
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Niveau',
+        }
+      }
+    },
+  };
+
+  useEffect(() => {
+    fetchResults();
+  }, []);
 
   return (
     <>
