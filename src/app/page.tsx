@@ -24,6 +24,12 @@ const capacityTests = [
     description: "Mesurez votre niveau de concentration et d'attention",
     image: "/focus.svg",
     link: "/tests/focus"
+  },
+  {
+    title: "Mémoire Verbale",
+    description: "Testez votre capacité à reconnaître des mots déjà vus",
+    image: "/word.svg",
+    link: "/tests/verbalMemory"
   }
 ];
 
