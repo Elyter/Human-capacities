@@ -30,6 +30,12 @@ const capacityTests = [
     description: "Testez votre capacité à reconnaître des mots déjà vus",
     image: "/word.svg",
     link: "/tests/verbalMemory"
+  },
+  {
+    title: "Test du Chimpanzé",
+    description: "Défiez les chimpanzés dans ce test de mémoire de travail",
+    image: "/chimp.svg",
+    link: "/tests/chimpTest"
   }
 ];
 
