@@ -225,25 +225,28 @@ export default function ReflexTest() {
         onMouseDown={handleClick}
       >
         {showStart ? (
-          <>
-            <h1 className="text-3xl font-bold text-center mb-8">
-              Test de Réflexes
-            </h1>
-            <button
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg text-xl hover:bg-blue-600 transition-colors mb-8"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                startTest();
-              }}
-            >
-              Démarrer
-            </button>
+          <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4">Test de Réflexes</h1>
+              <p className="mb-8">
+                Mesurez votre temps de réaction.
+                Attendez que l'écran devienne vert, puis cliquez le plus rapidement possible.
+                Attention à ne pas cliquer trop tôt !
+              </p>
+              <button
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                onClick={startTest}
+              >
+                Commencer
+              </button>
+            </div>
+
             {results.length > 0 && (
-              <div className="w-[600px] h-[300px] bg-white p-4 rounded-lg">
+              <div className="absolute top-full -mt-52 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <Line data={prepareChartData()} options={chartOptions} />
               </div>
             )}
-          </>
+          </div>
         ) : (
           <div className="text-center">
             {backgroundColor === 'green' && (
