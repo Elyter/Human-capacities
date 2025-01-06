@@ -8,10 +8,10 @@ const capacityTests = [
     link: "/tests/reflex"
   },
   {
-    title: "Mémoire Visuelle",
-    description: "Testez votre capacité à mémoriser des séquences de symboles",
+    title: "Mémoire des Chiffres",
+    description: "Testez votre capacité à mémoriser des séquences de chiffres",
     image: "/memory.svg",
-    link: "/tests/memory"
+    link: "/tests/numberMemory"
   },
   {
     title: "Coordination Œil-Main",
