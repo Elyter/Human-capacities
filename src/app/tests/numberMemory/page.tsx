@@ -25,10 +25,11 @@ ChartJS.register(
 
 export default function NumberMemoryTest() {
     const [level, setLevel] = useState(1);
+    const [lives, setLives] = useState(3);
     const [numbers, setNumbers] = useState<string>('');
     const [isShowingNumbers, setIsShowingNumbers] = useState(false);
     const [userInput, setUserInput] = useState('');
-    const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting');
+    const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'lost' | 'gameover'>('waiting');
     const inputRef = useRef<HTMLInputElement>(null);
     const [results, setResults] = useState<Array<{ timestamp: number, score: number }>>([]);
 
@@ -129,8 +130,8 @@ export default function NumberMemoryTest() {
     const startGame = () => {
         setGameStatus('playing');
         setLevel(1);
+        setLives(3);
         startNewLevel(1);
-        console.log('Game started', level);
     };
 
     const checkAnswer = async () => {
@@ -139,8 +140,13 @@ export default function NumberMemoryTest() {
             setLevel(nextLevel);
             startNewLevel(nextLevel);
         } else {
-            setGameStatus('lost');
-            await saveResult(level - 1);
+            setLives(prev => prev - 1);
+            if (lives <= 1) {
+                setGameStatus('gameover');
+                await saveResult(level - 1);
+            } else {
+                startNewLevel(level);
+            }
         }
     };
 
@@ -154,7 +160,7 @@ export default function NumberMemoryTest() {
         <>
             <Link 
                 href="/"
-                className="fixed top-4 left-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+                className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
             >
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -171,83 +177,91 @@ export default function NumberMemoryTest() {
                     />
                 </svg>
             </Link>
-            
-            {gameStatus === 'waiting' ? (
-                <div className="min-h-screen flex flex-col items-center justify-center">
-                    <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                        <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Chiffres</h1>
-                        <p className="mb-8">
-                            Mémorisez les chiffres qui apparaissent à l'écran.
-                            À chaque niveau réussi, vous devrez mémoriser un chiffre supplémentaire.
-                            Voyons jusqu'où vous pouvez aller !
-                        </p>
-                        <button 
-                            className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                            onClick={startGame}
-                        >
-                            Commencer
-                        </button>
-                    </div>
 
-                    {results.length > 0 && (
-                        <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                            <Line data={prepareChartData()} options={chartOptions} />
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                {gameStatus !== 'waiting' && (
+                    <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+                        <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                            <div className="text-2xl font-medium">Niveau {level}</div>
+                            <div className="flex gap-1">
+                                {Array.from({ length: lives }).map((_, i) => (
+                                    <span key={i} className="text-2xl">❤️</span>
+                                ))}
+                            </div>
                         </div>
-                    )}
-                </div>
-            ) : gameStatus === 'lost' ? (
-                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                    <h1 className="text-2xl font-bold">Game Over!</h1>
-                    <p>Vous avez atteint le niveau {level}</p>
-                    <div className="flex flex-col items-center gap-2 my-4">
-                        <p className="text-gray-600">Le chiffre à retenir était :</p>
-                        <span className="text-2xl font-bold text-green-600">{numbers}</span>
-                        <p className="text-gray-600">Vous avez écrit :</p>
-                        <span className="text-2xl font-bold text-red-600 line-through">{userInput}</span>
                     </div>
-                    <button 
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        onClick={() => {
-                            setGameStatus('waiting');
-                        }}
-                    >
-                        Recommencer
-                    </button>
-                </div>
-            ) : gameStatus === 'playing' ? (
-                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                    <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
-                    <p>Niveau {level}</p>
-                    
-                    {isShowingNumbers && (
-                        <div className="w-64 h-2 bg-gray-200 rounded overflow-hidden">
-                            <div className="progress-bar" key={level} />
-                        </div>
-                    )}
-                    
-                    {isShowingNumbers ? (
-                        <div className="text-4xl font-bold">{numbers}</div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-4">
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={userInput}
-                                onChange={(e) => setUserInput(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="p-2 border border-gray-300 rounded"
-                                autoFocus
-                            />
+                )}
+
+                {isShowingNumbers && (
+                    <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200">
+                        <div className="progress-bar"></div>
+                    </div>
+                )}
+
+                {gameStatus === 'waiting' ? (
+                    <div className="min-h-screen flex flex-col items-center justify-center">
+                        <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                            <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Chiffres</h1>
+                            <p className="mb-8">
+                                Mémorisez les chiffres qui apparaissent à l'écran.
+                                À chaque niveau réussi, vous devrez mémoriser un chiffre supplémentaire.
+                                Voyons jusqu'où vous pouvez aller !
+                            </p>
                             <button 
-                                onClick={checkAnswer}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                                onClick={startGame}
                             >
-                                Valider
+                                Commencer
                             </button>
                         </div>
-                    )}
-                </div>
-            ) : null}
+
+                        {results.length > 0 && (
+                            <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                                <Line data={prepareChartData()} options={chartOptions} />
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center min-h-screen gap-4 mt-20">
+                        {isShowingNumbers ? (
+                            <div className="text-8xl font-bold">{numbers}</div>
+                        ) : (
+                            <div className="flex flex-col items-center gap-4">
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={userInput}
+                                    onChange={(e) => setUserInput(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    className="text-4xl text-center w-64 p-4 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
+                                    autoFocus
+                                />
+                                <button 
+                                    onClick={checkAnswer}
+                                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                                >
+                                    Valider
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {gameStatus === 'gameover' && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-white p-8 rounded-2xl text-center">
+                            <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
+                            <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+                            <button 
+                                onClick={startGame}
+                                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                            >
+                                Rejouer
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </>
     );
 }
