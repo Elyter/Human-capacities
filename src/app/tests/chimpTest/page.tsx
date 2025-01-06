@@ -2,6 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+// Types
+type TestResult = {
+  timestamp: number;
+  score: number;
+};
 
 export default function ChimpTest() {
   const [level, setLevel] = useState(4); // Commence à 4 chiffres
@@ -15,6 +42,97 @@ export default function ChimpTest() {
   const [correctTiles, setCorrectTiles] = useState<number[]>([]);
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [clickedTile, setClickedTile] = useState<number | null>(null);
+  const [results, setResults] = useState<TestResult[]>([]);
+
+  // Charger les résultats au montage du composant
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/chimpTest');
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error('Error fetching results:', error);
+    }
+  };
+
+  const saveResult = async (score: number) => {
+    try {
+      await fetch('/api/chimpTest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: Date.now(),
+          score: score
+        })
+      });
+      await fetchResults();
+    } catch (error) {
+      console.error('Error saving result:', error);
+    }
+  };
+
+  const prepareChartData = () => {
+    // Créer les intervalles de score (4 à 12 par exemple)
+    const intervals = Array.from({ length: 9 }, (_, i) => i + 4);
+    const counts = new Array(intervals.length).fill(0);
+    
+    results.forEach(result => {
+      const index = result.score - 4;
+      if (index >= 0 && index < counts.length) {
+        counts[index]++;
+      }
+    });
+
+    // Convertir en pourcentages
+    const total = results.length;
+    const percentages = counts.map(count => (count / total) * 100 || 0);
+
+    return {
+      labels: intervals,
+      datasets: [
+        {
+          label: 'Distribution des scores (%)',
+          data: percentages,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.5)',
+          tension: 0.3
+        }
+      ]
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Pourcentage de parties (%)'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Niveau atteint'
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top' as const
+      },
+      title: {
+        display: true,
+        text: 'Distribution des performances'
+      }
+    }
+  };
 
   // Ajuster la taille de la grille en fonction du niveau
   useEffect(() => {
@@ -118,6 +236,25 @@ export default function ChimpTest() {
     }
   }, [gameStatus]);
 
+  useEffect(() => {
+    if (gameStatus === 'gameover') {
+      saveResult(level - 3);
+    }
+  }, [gameStatus, level]);
+
+  // Modifier la fonction pour retourner à l'écran d'accueil
+  const handleRestart = () => {
+    setGameStatus('waiting');
+    setLevel(4);
+    setGridSize(4);
+    setStrikes(0);
+    setScore(0);
+    setUserSequence([]);
+    setNumbers([]);
+    setCorrectTiles([]);
+    setErrorTile(null);
+  };
+
   return (
     <>
       <Link 
@@ -135,14 +272,21 @@ export default function ChimpTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+          <div className="text-center max-w-4xl w-full bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
             <h1 className="text-3xl font-bold mb-4">Test du Chimpanzé</h1>
             <p className="mb-4">
               Les chimpanzés surpassent systématiquement les humains dans ce test de mémoire.
               Certains peuvent mémoriser 9 chiffres avec plus de 90% de réussite.
             </p>
+            
+            {results.length > 0 && (
+              <div className="h-64 mb-8">
+                <Line data={prepareChartData()} options={chartOptions} />
+              </div>
+            )}
+
             <button 
               onClick={startGame}
               className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
@@ -222,10 +366,10 @@ export default function ChimpTest() {
               <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
               <p className="text-xl mb-6">Niveau atteint : {level - 3}</p>
               <button 
-                onClick={startGame}
+                onClick={handleRestart}
                 className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
               >
-                Rejouer
+                Retour à l'accueil
               </button>
             </div>
           </div>
@@ -233,4 +377,4 @@ export default function ChimpTest() {
       </div>
     </>
   );
-} 
+}
