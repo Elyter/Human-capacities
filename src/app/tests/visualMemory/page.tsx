@@ -194,17 +194,29 @@ export default function VisualMemoryTest() {
 
       <div className={styles.container}>
         {!isStarted ? (
-          <>
-            <div className={styles.startScreen}>
-              <h2>Test de Mémoire Visuelle</h2>
-              <p>Mémorisez les tuiles qui s'affichent et reproduisez la séquence.</p>
-              <p>Vous avez droit à 3 erreurs par niveau avant de perdre une vie.</p>
-              <button onClick={startGame}>Commencer le test</button>
+          <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4">Test de Mémoire Visuelle</h1>
+              <p className="mb-8">
+                Testez votre mémoire visuelle.
+                Des tuiles vont s'illuminer brièvement à l'écran.
+                Reproduisez la séquence pour passer au niveau suivant.
+                Vous avez droit à trois erreurs par niveau.
+              </p>
+              <button 
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                onClick={startGame}
+              >
+                Commencer
+              </button>
             </div>
-            <div className={styles.chartContainer} style={{ height: '300px', marginTop: '2rem' }}>
-              <Line data={prepareChartData()} options={chartOptions} />
-            </div>
-          </>
+
+            {results.length > 0 && (
+              <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                <Line data={prepareChartData()} options={chartOptions} />
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <div className={styles.stats}>

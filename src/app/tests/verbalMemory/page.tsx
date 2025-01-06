@@ -188,20 +188,27 @@ export default function VerbalMemoryTest() {
 
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="text-center w-full max-w-4xl">
-            <h1 className="text-2xl font-bold mb-4">Test de Mémoire Verbale</h1>
-            <p className="mb-8">Mémorisez les mots et indiquez si vous les avez déjà vus ou non.</p>
+          <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4">Test de Mémoire Verbale</h1>
+              <p className="mb-8">
+                Mémorisez les mots et indiquez si vous les avez déjà vus ou non.
+                Vous avez trois vies.
+                Voyons combien de mots vous pouvez mémoriser ! 
+              </p>
+              <button 
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                onClick={startGame}
+              >
+                Commencer
+              </button>
+            </div>
+
             {results.length > 0 && (
-              <div className="h-[300px] mb-8">
+              <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <Line data={prepareChartData()} options={chartOptions} />
               </div>
             )}
-            <button 
-              onClick={startGame}
-              className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-            >
-              Commencer
-            </button>
           </div>
         ) : (
           <>
