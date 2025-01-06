@@ -14,10 +14,10 @@ const capacityTests = [
     link: "/tests/numberMemory"
   },
   {
-    title: "Coordination Œil-Main",
-    description: "Évaluez votre précision et coordination",
-    image: "/coordination.svg",
-    link: "/tests/coordination"
+    title: "Mémoire Visuelle",
+    description: "Évaluez votre mémoire visuelle",
+    image: "/visual.svg",
+    link: "/tests/visualMemory"
   },
   {
     title: "Test de Concentration",
