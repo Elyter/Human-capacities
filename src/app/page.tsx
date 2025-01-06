@@ -10,7 +10,7 @@ const capacityTests = [
   {
     title: "Mémoire des Chiffres",
     description: "Testez votre capacité à mémoriser des séquences de chiffres",
-    image: "/memory.svg",
+    image: "/number.svg",
     link: "/tests/numberMemory"
   },
   {

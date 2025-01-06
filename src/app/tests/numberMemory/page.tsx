@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function NumberMemoryTest() {
     const [level, setLevel] = useState(1);
@@ -56,112 +57,123 @@ export default function NumberMemoryTest() {
         }
     };
 
-    if (gameStatus === 'waiting') {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
-                <p className="text-center max-w-md mb-4">
-                    Mémorisez les chiffres qui apparaissent pendant 5 secondes. 
-                    À chaque niveau, vous devrez mémoriser un chiffre supplémentaire.
-                </p>
-                <button 
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={startGame}
-                >
-                    Commencer le test
-                </button>
-            </div>
-        );
-    }
-
-    if (gameStatus === 'lost') {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <h1 className="text-2xl font-bold">Game Over!</h1>
-                <p>Vous avez atteint le niveau {level}</p>
-                <div className="flex flex-col items-center gap-2 my-4">
-                    <p className="text-gray-600">Le chiffre à retenir était :</p>
-                    <span className="text-2xl font-bold text-green-600">{numbers}</span>
-                    <p className="text-gray-600">Vous avez écrit :</p>
-                    <span className="text-2xl font-bold text-red-600 line-through">{userInput}</span>
-                </div>
-                <button 
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={() => {
-                        setGameStatus('waiting');
-                    }}
-                >
-                    Recommencer
-                </button>
-            </div>
-        );
-    }
-
-    if (gameStatus === 'playing') {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
-                <p>Niveau {level}</p>
-                
-                {/* Barre de progression modifiée */}
-                {isShowingNumbers && (
-                    <div className="w-64 h-2 bg-gray-200 rounded overflow-hidden">
-                        <div className="progress-bar" key={level} />
-                    </div>
-                )}
-                
-                {isShowingNumbers ? (
-                    <div className="text-4xl font-bold">{numbers}</div>
-                ) : (
-                    <div className="flex flex-col items-center gap-4">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={userInput}
-                            onChange={(e) => setUserInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className="p-2 border border-gray-300 rounded"
-                            autoFocus
-                        />
-                        <button 
-                            onClick={checkAnswer}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        >
-                            Valider
-                        </button>
-                    </div>
-                )}
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-            <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
-            <p>Niveau {level}</p>
-            
-            {isShowingNumbers ? (
-                <div className="text-4xl font-bold">{numbers}</div>
-            ) : (
-                <div className="flex flex-col items-center gap-4">
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="p-2 border border-gray-300 rounded"
-                        autoFocus
+        <>
+            <Link 
+                href="/"
+                className="fixed top-4 left-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+            >
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-6 w-6" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                >
+                    <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" 
                     />
+                </svg>
+            </Link>
+            {gameStatus === 'waiting' ? (
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                    <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
+                    <p className="text-center max-w-md mb-4">
+                        Mémorisez les chiffres qui apparaissent pendant 5 secondes. 
+                        À chaque niveau, vous devrez mémoriser un chiffre supplémentaire.
+                    </p>
                     <button 
-                        onClick={checkAnswer}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={startGame}
                     >
-                        Valider
+                        Commencer le test
                     </button>
                 </div>
+            ) : gameStatus === 'lost' ? (
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                    <h1 className="text-2xl font-bold">Game Over!</h1>
+                    <p>Vous avez atteint le niveau {level}</p>
+                    <div className="flex flex-col items-center gap-2 my-4">
+                        <p className="text-gray-600">Le chiffre à retenir était :</p>
+                        <span className="text-2xl font-bold text-green-600">{numbers}</span>
+                        <p className="text-gray-600">Vous avez écrit :</p>
+                        <span className="text-2xl font-bold text-red-600 line-through">{userInput}</span>
+                    </div>
+                    <button 
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={() => {
+                            setGameStatus('waiting');
+                        }}
+                    >
+                        Recommencer
+                    </button>
+                </div>
+            ) : gameStatus === 'playing' ? (
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                    <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
+                    <p>Niveau {level}</p>
+                    
+                    {/* Barre de progression modifiée */}
+                    {isShowingNumbers && (
+                        <div className="w-64 h-2 bg-gray-200 rounded overflow-hidden">
+                            <div className="progress-bar" key={level} />
+                        </div>
+                    )}
+                    
+                    {isShowingNumbers ? (
+                        <div className="text-4xl font-bold">{numbers}</div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4">
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className="p-2 border border-gray-300 rounded"
+                                autoFocus
+                            />
+                            <button 
+                                onClick={checkAnswer}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Valider
+                            </button>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                    <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
+                    <p>Niveau {level}</p>
+                    
+                    {isShowingNumbers ? (
+                        <div className="text-4xl font-bold">{numbers}</div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4">
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className="p-2 border border-gray-300 rounded"
+                                autoFocus
+                            />
+                            <button 
+                                onClick={checkAnswer}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Valider
+                            </button>
+                        </div>
+                    )}
+                </div>
             )}
-        </div>
+        </>
     );
 }
 
