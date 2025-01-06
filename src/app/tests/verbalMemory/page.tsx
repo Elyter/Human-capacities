@@ -2,6 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Liste de mots français courants
 const MOTS_FRANCAIS = [
@@ -22,6 +43,83 @@ export default function VerbalMemoryTest() {
   const [score, setScore] = useState<number>(0);
   const [vies, setVies] = useState<number>(3);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'gameover'>('waiting');
+  const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
+
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/verbalMemory');
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des résultats:', error);
+    }
+  };
+
+  const saveScore = async () => {
+    try {
+      await fetch('/api/verbalMemory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ score }),
+      });
+      fetchResults();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du score:', error);
+    }
+  };
+
+  const prepareChartData = () => {
+    // Définir les intervalles pour les scores
+    const intervals = Array.from({ length: 10 }, (_, i) => i * 10);
+    const data = new Array(intervals.length).fill(0);
+    const total = results.length;
+
+    results.forEach(result => {
+      const index = Math.floor(result.score / 10);
+      if (index < data.length) {
+        data[index]++;
+      }
+    });
+
+    // Convertir en pourcentages
+    const percentages = data.map(count => (count / total) * 100 || 0);
+
+    return {
+      labels: intervals.map(i => `${i}-${i + 9}`),
+      datasets: [{
+        label: 'Distribution des scores (%)',
+        data: percentages,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }]
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Pourcentage'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Intervalles de score'
+        }
+      }
+    }
+  };
 
   const choisirNouveauMot = () => {
     const utiliserMotDejaVu = Math.random() > 0.5 && motsDejaProposes.size > 0;
@@ -39,6 +137,11 @@ export default function VerbalMemoryTest() {
     }
   };
 
+  const handleGameOver = async () => {
+    setGameStatus('gameover');
+    await saveScore();
+  };
+
   const handleReponse = (dejaVu: boolean) => {
     const estEffectivementDejaVu = motsDejaProposes.has(motCourant);
     
@@ -50,7 +153,7 @@ export default function VerbalMemoryTest() {
     } else {
       setVies(prev => prev - 1);
       if (vies <= 1) {
-        setGameStatus('gameover');
+        handleGameOver();
         return;
       }
     }
@@ -85,11 +188,14 @@ export default function VerbalMemoryTest() {
 
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-            <h1 className="text-3xl font-bold mb-4">Test de Mémoire Verbale</h1>
-            <p className="mb-4">
-              Mémorisez les mots et indiquez si vous les avez déjà vus ou non.
-            </p>
+          <div className="text-center w-full max-w-4xl">
+            <h1 className="text-2xl font-bold mb-4">Test de Mémoire Verbale</h1>
+            <p className="mb-8">Mémorisez les mots et indiquez si vous les avez déjà vus ou non.</p>
+            {results.length > 0 && (
+              <div className="h-[300px] mb-8">
+                <Line data={prepareChartData()} options={chartOptions} />
+              </div>
+            )}
             <button 
               onClick={startGame}
               className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
@@ -150,4 +256,4 @@ export default function VerbalMemoryTest() {
       </div>
     </>
   );
-} 
+}

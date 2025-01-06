@@ -2,8 +2,30 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function ReflexTest() {
+  const [results, setResults] = useState<number[]>([]);
   const [backgroundColor, setBackgroundColor] = useState<string>('white');
   const [startTime, setStartTime] = useState<number | null>(null);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
@@ -79,10 +101,92 @@ export default function ReflexTest() {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      setReactionTime(currentTime);
+      const finalTime = currentTime;
+      setReactionTime(finalTime);
       setBackgroundColor('white');
       setIsWaiting(false);
+
+      // Sauvegarder le résultat et mettre à jour le graphique
+      fetch('/api/reflex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reactionTime: finalTime }),
+      })
+        .then(() => fetchResults())  // Recharger les résultats après la sauvegarde
+        .catch(error => console.error('Erreur lors de la sauvegarde:', error));
     }
+  };
+
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/reflex');
+      const data = await response.json();
+      const times = data.map((r: { reactionTime: number }) => r.reactionTime);
+      setResults(times);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des résultats:', error);
+    }
+  };
+
+  const prepareChartData = () => {
+    // Créer des intervalles de 25ms jusqu'à 500ms
+    const intervals = Array.from({ length: 21 }, (_, i) => i * 25);
+    const counts = new Array(21).fill(0);
+
+    results.forEach(time => {
+      const index = Math.floor(time / 25);
+      if (index >= 0 && index < 21) {
+        counts[index]++;
+      }
+    });
+
+    // Convertir en pourcentages
+    const percentages = counts.map(count => (count / results.length) * 100 || 0);
+
+    return {
+      labels: intervals.map(i => `${i}ms`),
+      datasets: [
+        {
+          label: 'Distribution des temps de réaction',
+          data: percentages,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.3,
+          fill: false,
+        },
+      ],
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Pourcentage',
+        },
+        ticks: {
+          callback: (value: number) => `${value}%`,
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Temps de réaction (ms)',
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45
+        }
+      },
+    },
   };
 
   useEffect(() => {
@@ -119,15 +223,25 @@ export default function ReflexTest() {
         onMouseDown={handleClick}
       >
         {showStart ? (
-          <button
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg text-xl hover:bg-blue-600 transition-colors"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              startTest();
-            }}
-          >
-            Démarrer
-          </button>
+          <>
+            <h1 className="text-3xl font-bold text-center mb-8">
+              Test de Réflexes
+            </h1>
+            <button
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg text-xl hover:bg-blue-600 transition-colors mb-8"
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                startTest();
+              }}
+            >
+              Démarrer
+            </button>
+            {results.length > 0 && (
+              <div className="w-[600px] h-[300px] bg-white p-4 rounded-lg">
+                <Line data={prepareChartData()} options={chartOptions} />
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center">
             {backgroundColor === 'green' && (
