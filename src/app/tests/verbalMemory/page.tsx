@@ -231,13 +231,13 @@ export default function VerbalMemoryTest() {
               <div className="flex gap-4">
                 <button 
                   onClick={() => handleReponse(true)}
-                  className="px-8 py-4 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all hover:scale-105"
+                  className="px-8 py-4 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-colors text-xl"
                 >
                   DÉJÀ VU
                 </button>
                 <button 
                   onClick={() => handleReponse(false)}
-                  className="px-8 py-4 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all hover:scale-105"
+                  className="px-8 py-4 bg-gray-400 text-white rounded-xl hover:bg-gray-500 transition-colors text-xl"
                 >
                   NOUVEAU
                 </button>
