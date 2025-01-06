@@ -173,7 +173,9 @@ export default function ReflexTest() {
           text: 'Pourcentage',
         },
         ticks: {
-          callback: (value: number) => `${value}%`,
+          callback: function(tickValue: number | string) {
+            return `${tickValue}%`;
+          }
         }
       },
       x: {
