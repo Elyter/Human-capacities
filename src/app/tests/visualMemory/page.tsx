@@ -2,6 +2,27 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import styles from './page.module.css'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Line } from 'react-chartjs-2'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default function VisualMemoryTest() {
   const [lives, setLives] = useState(3)
@@ -15,6 +36,7 @@ export default function VisualMemoryTest() {
   const [correctTiles, setCorrectTiles] = useState<number[]>([])
   const [errorTiles, setErrorTiles] = useState<number[]>([])
   const [isStarted, setIsStarted] = useState(false)
+  const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([])
 
   const gridSize = Math.min(3 + Math.floor(level / 2), 7)
   const tilesToRemember = Math.min(3 + level, gridSize * gridSize - 1)
@@ -60,6 +82,7 @@ export default function VisualMemoryTest() {
         setLives(prev => prev - 1)
         if (lives <= 1) {
           setGameOver(true)
+          saveResult(score) // Sauvegarder le score final
         } else {
           startLevel() // Démarrage immédiat du nouveau niveau
         }
@@ -77,8 +100,74 @@ export default function VisualMemoryTest() {
     }
   }
 
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/visualMemory')
+      const data = await response.json()
+      setResults(data)
+    } catch (error) {
+      console.error('Failed to fetch results:', error)
+    }
+  }
+
+  const saveResult = async (finalScore: number) => {
+    try {
+      await fetch('/api/visualMemory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score: finalScore })
+      })
+      await fetchResults()
+    } catch (error) {
+      console.error('Failed to save result:', error)
+    }
+  }
+
+  const prepareChartData = () => {
+    const intervals = Array.from({ length: 11 }, (_, i) => i * 10)
+    const data = new Array(intervals.length - 1).fill(0)
+    
+    results.forEach(result => {
+      const index = Math.min(Math.floor(result.score / 10), intervals.length - 2)
+      data[index]++
+    })
+
+    const total = data.reduce((a, b) => a + b, 0)
+    const percentages = data.map(count => (count / total) * 100)
+
+    return {
+      labels: intervals.slice(0, -1).map(i => `${i}-${i + 9}`),
+      datasets: [{
+        label: 'Distribution des scores (%)',
+        data: percentages,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }]
+    }
+  }
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: '% des parties'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Intervalles de score'
+        }
+      }
+    }
+  }
+
   useEffect(() => {
-    // Suppression du startLevel() automatique
+    fetchResults()
   }, [])
 
   return (
@@ -105,12 +194,17 @@ export default function VisualMemoryTest() {
 
       <div className={styles.container}>
         {!isStarted ? (
-          <div className={styles.startScreen}>
-            <h2>Test de Mémoire Visuelle</h2>
-            <p>Mémorisez les tuiles qui s'affichent et reproduisez la séquence.</p>
-            <p>Vous avez droit à 3 erreurs par niveau avant de perdre une vie.</p>
-            <button onClick={startGame}>Commencer le test</button>
-          </div>
+          <>
+            <div className={styles.startScreen}>
+              <h2>Test de Mémoire Visuelle</h2>
+              <p>Mémorisez les tuiles qui s'affichent et reproduisez la séquence.</p>
+              <p>Vous avez droit à 3 erreurs par niveau avant de perdre une vie.</p>
+              <button onClick={startGame}>Commencer le test</button>
+            </div>
+            <div className={styles.chartContainer} style={{ height: '300px', marginTop: '2rem' }}>
+              <Line data={prepareChartData()} options={chartOptions} />
+            </div>
+          </>
         ) : (
           <>
             <div className={styles.stats}>

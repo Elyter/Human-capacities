@@ -1,6 +1,27 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 export default function NumberMemoryTest() {
     const [level, setLevel] = useState(1);
@@ -9,6 +30,77 @@ export default function NumberMemoryTest() {
     const [userInput, setUserInput] = useState('');
     const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting');
     const inputRef = useRef<HTMLInputElement>(null);
+    const [results, setResults] = useState<Array<{ timestamp: number, score: number }>>([]);
+
+    useEffect(() => {
+        fetchResults();
+    }, []);
+
+    const fetchResults = async () => {
+        try {
+            const response = await fetch('/api/numberMemory');
+            const data = await response.json();
+            setResults(data);
+        } catch (error) {
+            console.error('Erreur lors du chargement des résultats:', error);
+        }
+    };
+
+    const saveResult = async (score: number) => {
+        try {
+            await fetch('/api/numberMemory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score })
+            });
+            await fetchResults();
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde du résultat:', error);
+        }
+    };
+
+    const prepareChartData = () => {
+        const intervals = Array.from({ length: 10 }, (_, i) => i + 1);
+        const data = new Array(intervals.length).fill(0);
+        
+        results.forEach(result => {
+            const index = Math.min(Math.floor(result.score) - 1, intervals.length - 1);
+            if (index >= 0) data[index]++;
+        });
+
+        const totalResults = results.length;
+        const percentages = data.map(count => (count / totalResults) * 100);
+
+        return {
+            labels: intervals.map(i => `${i} chiffres`),
+            datasets: [{
+                label: 'Pourcentage des scores',
+                data: percentages,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        };
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Pourcentage des parties'
+                }
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Distribution des scores'
+            }
+        }
+    };
 
     const generateNumbers = (level: number) => {
         let result = '';
@@ -41,13 +133,14 @@ export default function NumberMemoryTest() {
         console.log('Game started', level);
     };
 
-    const checkAnswer = () => {
+    const checkAnswer = async () => {
         if (userInput === numbers) {
             const nextLevel = level + 1;
             setLevel(nextLevel);
             startNewLevel(nextLevel);
         } else {
             setGameStatus('lost');
+            await saveResult(level - 1);
         }
     };
 
@@ -78,8 +171,9 @@ export default function NumberMemoryTest() {
                     />
                 </svg>
             </Link>
+            
             {gameStatus === 'waiting' ? (
-                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
                     <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
                     <p className="text-center max-w-md mb-4">
                         Mémorisez les chiffres qui apparaissent pendant 5 secondes. 
@@ -91,6 +185,12 @@ export default function NumberMemoryTest() {
                     >
                         Commencer le test
                     </button>
+                    
+                    {results.length > 0 && (
+                        <div className="w-full max-w-2xl h-[400px] mt-8">
+                            <Line data={prepareChartData()} options={chartOptions} />
+                        </div>
+                    )}
                 </div>
             ) : gameStatus === 'lost' ? (
                 <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -116,7 +216,6 @@ export default function NumberMemoryTest() {
                     <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
                     <p>Niveau {level}</p>
                     
-                    {/* Barre de progression modifiée */}
                     {isShowingNumbers && (
                         <div className="w-64 h-2 bg-gray-200 rounded overflow-hidden">
                             <div className="progress-bar" key={level} />
@@ -145,34 +244,7 @@ export default function NumberMemoryTest() {
                         </div>
                     )}
                 </div>
-            ) : (
-                <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                    <h1 className="text-2xl font-bold">Test de Mémoire des Chiffres</h1>
-                    <p>Niveau {level}</p>
-                    
-                    {isShowingNumbers ? (
-                        <div className="text-4xl font-bold">{numbers}</div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-4">
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={userInput}
-                                onChange={(e) => setUserInput(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="p-2 border border-gray-300 rounded"
-                                autoFocus
-                            />
-                            <button 
-                                onClick={checkAnswer}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            >
-                                Valider
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+            ) : null}
         </>
     );
 }
