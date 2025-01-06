@@ -27,7 +27,7 @@ ChartJS.register(
 export default function ReflexTest() {
   const [results, setResults] = useState<number[]>([]);
   const [backgroundColor, setBackgroundColor] = useState<string>('white');
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const [, setStartTime] = useState<number | null>(null);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [showStart, setShowStart] = useState<boolean>(true);
@@ -265,7 +265,7 @@ export default function ReflexTest() {
             {reactionTime && reactionTime > 0 && (
               <div className="bg-white p-4 rounded-lg">
                 <p className="text-xl">Votre temps de réaction : {reactionTime} ms</p>
-                <p className="mt-2">Cliquez n'importe où pour réessayer</p>
+                <p className="mt-2">Cliquez n&apos;importe où pour réessayer</p>
               </div>
             )}
           </div>

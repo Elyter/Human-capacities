@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       const data = await fs.readFile(DATA_FILE, 'utf-8');
       results = JSON.parse(data);
     } catch (error) {
-      // Le fichier n'existe pas encore, on continue avec un tableau vide
+      NextResponse.json({ error }, { status: 500 });
     }
 
     // Ajouter le nouveau résultat
@@ -51,10 +51,10 @@ export async function GET() {
       const data = await fs.readFile(DATA_FILE, 'utf-8');
       results = JSON.parse(data);
     } catch (error) {
-      // Le fichier n'existe pas encore
+      NextResponse.json({ error }, { status: 500 });
     }
     return NextResponse.json(results);
   } catch (error) {
-    return NextResponse.json({ error: 'Erreur lors de la lecture' }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }

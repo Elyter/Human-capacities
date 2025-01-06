@@ -197,7 +197,7 @@ export default function VisualMemoryTest() {
           <>
             <div className={styles.startScreen}>
               <h2>Test de Mémoire Visuelle</h2>
-              <p>Mémorisez les tuiles qui s'affichent et reproduisez la séquence.</p>
+              <p>Mémorisez les tuiles qui s&apos;affichent et reproduisez la séquence.</p>
               <p>Vous avez droit à 3 erreurs par niveau avant de perdre une vie.</p>
               <button onClick={startGame}>Commencer le test</button>
             </div>

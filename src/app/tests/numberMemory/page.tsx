@@ -248,15 +248,3 @@ export default function NumberMemoryTest() {
         </>
     );
 }
-
-// Ajouter ce style global dans votre CSS ou directement dans le composant
-const styles = `
-@keyframes progress {
-    from {
-        width: 100%;
-    }
-    to {
-        width: 0%;
-    }
-}
-`;

@@ -9,7 +9,7 @@ export default function ChimpTest() {
   const [userSequence, setUserSequence] = useState<number[]>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'showing' | 'gameover'>('waiting');
   const [strikes, setStrikes] = useState(0);
-  const [score, setScore] = useState(0);
+  const [, setScore] = useState(0);
   const [gridSize, setGridSize] = useState(4); // Commence avec une grille 4x4
   const [numbersVisible, setNumbersVisible] = useState(true);
   const [correctTiles, setCorrectTiles] = useState<number[]>([]);
