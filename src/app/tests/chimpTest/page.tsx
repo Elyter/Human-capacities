@@ -369,7 +369,7 @@ export default function ChimpTest() {
                 onClick={handleRestart}
                 className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
               >
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </button>
             </div>
           </div>
