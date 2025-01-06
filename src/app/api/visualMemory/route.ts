@@ -19,7 +19,7 @@ export async function GET() {
     const data = await fs.readFile(dataFilePath, 'utf8').catch(() => '[]')
     return NextResponse.json(JSON.parse(data))
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
 
@@ -39,6 +39,6 @@ export async function POST(request: Request) {
     await fs.writeFile(dataFilePath, JSON.stringify(results))
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to save data' }, { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
