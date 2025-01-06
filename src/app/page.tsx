@@ -30,6 +30,12 @@ const capacityTests = [
     description: "Défiez les chimpanzés dans ce test de mémoire de travail",
     image: "/chimp.svg",
     link: "/tests/chimpTest"
+  },
+  {
+    title: "Vitesse de frappe",
+    description: "Testez votre vitesse de frappe au clavier",
+    image: "/keyboard.svg",
+    link: "/tests/typingSpeed"
   }
 ];
 
