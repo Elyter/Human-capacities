@@ -70,7 +70,7 @@ export default function VerbalMemoryTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -83,52 +83,68 @@ export default function VerbalMemoryTest() {
         </svg>
       </Link>
 
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Test de Mémoire Verbale</h1>
-            <p className="mb-8">Mémorisez les mots et indiquez si vous les avez déjà vus ou non.</p>
+          <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+            <h1 className="text-3xl font-bold mb-4">Test de Mémoire Verbale</h1>
+            <p className="mb-4">
+              Mémorisez les mots et indiquez si vous les avez déjà vus ou non.
+            </p>
             <button 
               onClick={startGame}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
             >
               Commencer
             </button>
           </div>
-        ) : gameStatus === 'playing' ? (
-          <div className="text-center">
-            <div className="mb-8">
-              <div className="text-sm mb-2">Score: {score}</div>
-              <div className="text-sm">Vies: {'❤️'.repeat(vies)}</div>
-            </div>
-            
-            <div className="text-4xl font-bold mb-8">{motCourant}</div>
-            
-            <div className="flex gap-4">
-              <button 
-                onClick={() => handleReponse(true)}
-                className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
-              >
-                DÉJÀ VU
-              </button>
-              <button 
-                onClick={() => handleReponse(false)}
-                className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
-              >
-                NOUVEAU
-              </button>
-            </div>
-          </div>
         ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-            <p className="text-xl mb-8">Score final : {score}</p>
-            <button 
-              onClick={startGame}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              Rejouer
-            </button>
+          <>
+            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+              <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                <div className="text-2xl">Score: {score}</div>
+                <div className="flex gap-1">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <span key={i} className="text-2xl">
+                      {i < (3 - vies) ? '🖤' : '❤️'}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-8 pt-24">
+              <div className="text-4xl font-bold mb-8">{motCourant}</div>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => handleReponse(true)}
+                  className="px-8 py-4 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all hover:scale-105"
+                >
+                  DÉJÀ VU
+                </button>
+                <button 
+                  onClick={() => handleReponse(false)}
+                  className="px-8 py-4 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all hover:scale-105"
+                >
+                  NOUVEAU
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {gameStatus === 'gameover' && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-2xl text-center">
+              <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
+              <p className="text-xl mb-6">Score final : {score}</p>
+              <button 
+                onClick={startGame}
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+              >
+                Rejouer
+              </button>
+            </div>
           </div>
         )}
       </div>
