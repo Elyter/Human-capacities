@@ -203,9 +203,9 @@ export default function NumberMemoryTest() {
                         <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                             <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Chiffres</h1>
                             <p className="mb-8">
-                                Mémorisez les chiffres qui apparaissent à l'écran.
+                                Mémorisez les chiffres qui apparaissent à l&apos;écran.
                                 À chaque niveau réussi, vous devrez mémoriser un chiffre supplémentaire.
-                                Voyons jusqu'où vous pouvez aller !
+                                Voyons jusqu&apos;où vous pouvez aller !
                             </p>
                             <button 
                                 className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"

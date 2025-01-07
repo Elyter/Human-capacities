@@ -199,7 +199,7 @@ export default function VisualMemoryTest() {
               <h1 className="text-3xl font-bold mb-4">Test de Mémoire Visuelle</h1>
               <p className="mb-8">
                 Testez votre mémoire visuelle.
-                Des tuiles vont s'illuminer brièvement à l'écran.
+                Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
                 Reproduisez la séquence pour passer au niveau suivant.
                 Vous avez droit à trois erreurs par niveau.
               </p>

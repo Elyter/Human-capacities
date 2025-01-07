@@ -253,8 +253,8 @@ export default function SequenceMemoryTest() {
               <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
                 <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire de Séquence</h1>
                 <p className="mb-8 text-center">
-                  Mémorisez la séquence qui s'affiche et reproduisez-la dans le même ordre.
-                  À chaque niveau, la séquence s'allonge d'un clic.
+                  Mémorisez la séquence qui s&apos;affiche et reproduisez-la dans le même ordre.
+                  À chaque niveau, la séquence s&apos;allonge d&apos;un clic.
                   Vous avez trois vies.
                 </p>
                 <div className="flex justify-center">

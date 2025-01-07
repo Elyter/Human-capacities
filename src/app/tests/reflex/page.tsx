@@ -230,7 +230,7 @@ export default function ReflexTest() {
               <h1 className="text-3xl font-bold mb-4">Test de Réflexes</h1>
               <p className="mb-8">
                 Mesurez votre temps de réaction.
-                Attendez que l'écran devienne vert, puis cliquez le plus rapidement possible.
+                Attendez que l&apos;écran devienne vert, puis cliquez le plus rapidement possible.
                 Attention à ne pas cliquer trop tôt !
               </p>
               <button
