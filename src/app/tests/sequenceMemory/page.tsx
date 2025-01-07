@@ -14,11 +14,18 @@ export default function SequenceMemoryTest() {
   const [correctTiles, setCorrectTiles] = useState<number[]>([]);
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [clickedTile, setClickedTile] = useState<number | null>(null);
+  const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
 
   const generateSequence = (currentLevel: number) => {
-    const newSequence = [...sequence];
-    newSequence.push(Math.floor(Math.random() * 9));
-    return newSequence;
+    if (currentLevel === 1) {
+      // Au niveau 1, générer une nouvelle séquence avec une seule tuile
+      return [Math.floor(Math.random() * 9)];
+    } else {
+      // Pour les niveaux suivants, ajouter une tuile à la séquence existante
+      const newSequence = [...sequence];
+      newSequence.push(Math.floor(Math.random() * 9));
+      return newSequence;
+    }
   };
 
   const startGame = () => {
@@ -27,6 +34,7 @@ export default function SequenceMemoryTest() {
     setGameStatus('playing');
     setCorrectTiles([]);
     setErrorTile(null);
+    setUserSequence([]);
     const initialSequence = generateSequence(1);
     setSequence(initialSequence);
     showSequence(initialSequence);
@@ -41,34 +49,24 @@ export default function SequenceMemoryTest() {
     let currentIndex = 0;
     
     const showNext = () => {
-        if (currentIndex >= sequenceToShow.length) {
-            setActiveIndex(null);
-            setIsShowingSequence(false);
-            return;
-        }
-        
-        setActiveIndex(sequenceToShow[currentIndex]);
-        
+      if (currentIndex >= sequenceToShow.length) {
+        setActiveIndex(null);
+        setIsShowingSequence(false);
+        return;
+      }
+      
+      setActiveIndex(sequenceToShow[currentIndex]);
+      
+      setTimeout(() => {
+        setActiveIndex(null);
         setTimeout(() => {
-            setActiveIndex(null);
-            setTimeout(() => {
-                currentIndex++;
-                showNext();
-            }, 200); // Pause entre chaque numéro
-        }, 800); // Durée d'affichage de chaque numéro
+          currentIndex++;
+          showNext();
+        }, 200); // Pause entre chaque numéro
+      }, 800); // Durée d'affichage de chaque numéro
     };
     
-    // Démarrer avec un délai initial
-    setTimeout(() => {
-        setActiveIndex(sequenceToShow[0]);
-        setTimeout(() => {
-            setActiveIndex(null);
-            setTimeout(() => {
-                currentIndex = 1;
-                showNext();
-            }, 200);
-        }, 800);
-    }, 500);
+    setTimeout(() => showNext(), 500); // Délai initial
   };
 
   const handleTileClick = (index: number) => {
@@ -81,36 +79,36 @@ export default function SequenceMemoryTest() {
     const currentIndex = userSequence.length;
     
     if (index === sequence[currentIndex]) {
-        // Bonne tuile - effet temporaire
-        setCorrectTiles(prev => [...prev, index]);
-        setTimeout(() => setCorrectTiles([]), 200);
-        
-        setUserSequence(prev => [...prev, index]);
+      // Bonne tuile - effet temporaire
+      setCorrectTiles(prev => [...prev, index]);
+      setTimeout(() => setCorrectTiles([]), 200);
+      
+      setUserSequence(prev => [...prev, index]);
 
-        if (userSequence.length + 1 === sequence.length) {
-            setTimeout(() => {
-                setLevel(prev => prev + 1);
-                const newSequence = generateSequence(level + 1);
-                setSequence(newSequence);
-                setUserSequence([]);
-                showSequence(newSequence);
-            }, 500);
-        }
-    } else {
-        // Mauvaise tuile
-        setErrorTile(index);
-        setTimeout(() => setErrorTile(null), 200);
-        setLives(prev => prev - 1);
-        
+      if (userSequence.length + 1 === sequence.length) {
         setTimeout(() => {
-            if (lives <= 1) {
-                setGameStatus('gameover');
-                saveResult(level - 1);
-            } else {
-                setUserSequence([]);
-                showSequence(sequence);
-            }
+          setLevel(prev => prev + 1);
+          const newSequence = generateSequence(level + 1);
+          setSequence(newSequence);
+          setUserSequence([]);
+          showSequence(newSequence);
         }, 500);
+      }
+    } else {
+      // Mauvaise tuile
+      setErrorTile(index);
+      setTimeout(() => setErrorTile(null), 200);
+      setLives(prev => prev - 1);
+      
+      setTimeout(() => {
+        if (lives <= 1) {
+          setGameStatus('gameover');
+          saveResult(level - 1);
+        } else {
+          setUserSequence([]);
+          showSequence(sequence); // Rejouer la même séquence au même niveau
+        }
+      }, 500);
     }
   };
 
