@@ -42,6 +42,12 @@ const capacityTests = [
     description: "Reproduisez la séquence dans le bon ordre",
     image: "/sequence.svg",
     link: "/tests/sequenceMemory"
+  },
+  {
+    title: "Vitesse de frappe",
+    description: "Testez votre vitesse de frappe au clavier",
+    image: "/keyboard.svg",
+    link: "/tests/typingSpeed"
   }
 ];
 
