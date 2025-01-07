@@ -36,6 +36,12 @@ const capacityTests = [
     description: "Retrouvez les paires de symboles cachés",
     image: "/symbol.svg",
     link: "/tests/symbolMemory"
+  },
+  {
+    title: "Mémoire de Séquence",
+    description: "Reproduisez la séquence dans le bon ordre",
+    image: "/sequence.svg",
+    link: "/tests/sequenceMemory"
   }
 ];
 
