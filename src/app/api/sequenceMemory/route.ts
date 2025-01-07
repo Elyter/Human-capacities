@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(result);
   } catch (error) {
-    return NextResponse.json({ error: 'Error saving result' }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }
 
@@ -26,6 +26,6 @@ export async function GET() {
     });
     return NextResponse.json(results);
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching results' }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 } 
