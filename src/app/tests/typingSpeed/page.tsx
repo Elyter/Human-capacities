@@ -1,5 +1,26 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Line } from 'react-chartjs-2'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 type WordStatus = {
   text: string;
@@ -31,6 +52,11 @@ const WORD_LIST = [
 
 const WORDS_PER_LINE = 8; // Nombre de mots par ligne
 
+type Result = {
+  timestamp: number;
+  score: number;
+}
+
 export default function TypingSpeed() {
   const [isStarted, setIsStarted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(60)
@@ -43,7 +69,9 @@ export default function TypingSpeed() {
   const [currentLine, setCurrentLine] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null);
+  const [results, setResults] = useState<Result[]>([])
 
+  // Séparer les effets pour le timer et la fin du jeu
   useEffect(() => {
     if (isStarted && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -51,11 +79,53 @@ export default function TypingSpeed() {
       }, 1000)
 
       return () => clearInterval(timer)
-    } else if (timeLeft === 0) {
-      setIsFinished(true)
-      setIsStarted(false)
     }
   }, [isStarted, timeLeft])
+
+  // Nouvel effet pour gérer la fin du jeu
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setIsFinished(true)
+      setIsStarted(false)
+      saveResult(wordCount)
+    }
+  }, [timeLeft])
+
+  useEffect(() => {
+    if (isStarted && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isStarted]);
+
+  useEffect(() => {
+    fetchResults()
+  }, [])
+
+  const fetchResults = async () => {
+    try {
+      const response = await fetch('/api/typingSpeed')
+      const data = await response.json()
+      setResults(data)
+    } catch (error) {
+      console.error('Failed to fetch results:', error)
+    }
+  }
+
+  const saveResult = async (score: number) => {
+    try {
+      await fetch('/api/typingSpeed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: Date.now(),
+          score: score
+        })
+      })
+      await fetchResults()
+    } catch (error) {
+      console.error('Failed to save result:', error)
+    }
+  }
 
   const shuffleWords = () => {
     return WORD_LIST.sort(() => Math.random() - 0.5).map(word => ({
@@ -117,6 +187,55 @@ export default function TypingSpeed() {
       setCurrentInput('')
     } else {
       setCurrentInput(value)
+    }
+  }
+
+  const prepareChartData = () => {
+    const intervals = [0, 20, 40, 60, 80, 100]
+    const counts = new Array(intervals.length - 1).fill(0)
+    const total = results.length
+
+    results.forEach(result => {
+      for (let i = 0; i < intervals.length - 1; i++) {
+        if (result.score >= intervals[i] && result.score < intervals[i + 1]) {
+          counts[i]++
+          break
+        }
+      }
+    })
+
+    const data = {
+      labels: intervals.slice(0, -1).map(i => `${i}-${i + 20} mpm`),
+      datasets: [{
+        label: 'Distribution des scores',
+        data: counts.map(count => (count / total) * 100 || 0),
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }]
+    }
+
+    return data
+  }
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Distribution des scores de vitesse de frappe'
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Pourcentage'
+        }
+      }
     }
   }
 
@@ -185,6 +304,12 @@ export default function TypingSpeed() {
           </button>
         </div>
       )}
+
+      <div className="w-full max-w-3xl mt-8">
+        <div className="bg-white p-4 rounded shadow-md">
+          <Line data={prepareChartData()} options={chartOptions} />
+        </div>
+      </div>
     </div>
   )
 }
