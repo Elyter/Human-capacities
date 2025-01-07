@@ -2,6 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function SequenceMemoryTest() {
   const [level, setLevel] = useState(1);
@@ -69,6 +90,11 @@ export default function SequenceMemoryTest() {
     setTimeout(() => showNext(), 500); // Délai initial
   };
 
+  const handleGameOver = () => {
+    saveResult(level - 1);
+    setGameStatus('waiting');
+  };
+
   const handleTileClick = (index: number) => {
     if (isShowingSequence || gameStatus !== 'playing') return;
 
@@ -103,7 +129,7 @@ export default function SequenceMemoryTest() {
       setTimeout(() => {
         if (lives <= 1) {
           setGameStatus('gameover');
-          saveResult(level - 1);
+          handleGameOver();
         } else {
           setUserSequence([]);
           showSequence(sequence); // Rejouer la même séquence au même niveau
@@ -116,9 +142,10 @@ export default function SequenceMemoryTest() {
     try {
       const response = await fetch('/api/sequenceMemory');
       const data = await response.json();
-      setResults(data);
+      setResults(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch results:', error);
+      setResults([]);
     }
   };
 
@@ -141,6 +168,67 @@ export default function SequenceMemoryTest() {
     fetchResults();
   }, []);
 
+  const prepareChartData = (results: Array<{ score: number }>) => {
+    // Créer un tableau de 12 niveaux (1-12)
+    const levels = Array.from({ length: 12 }, (_, i) => i + 1);
+    
+    // Compter le nombre de parties pour chaque niveau
+    const scoreCounts = new Array(12).fill(0);
+    results.forEach(result => {
+      if (result.score >= 1 && result.score <= 12) {
+        scoreCounts[result.score - 1]++;
+      }
+    });
+    
+    // Calculer les pourcentages
+    const total = results.length || 1;
+    const percentages = scoreCounts.map(count => (count / total) * 100);
+
+    return {
+      labels: levels,
+      datasets: [{
+        label: 'Pourcentage des parties',
+        data: percentages,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 2,
+      }]
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: 'Pourcentage des parties (%)'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Niveau atteint'
+        },
+        ticks: {
+          stepSize: 1
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Distribution des scores'
+      }
+    }
+  };
+
   return (
     <>
       <Link 
@@ -158,73 +246,96 @@ export default function SequenceMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        {gameStatus === 'waiting' ? (
-          <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-            <h1 className="text-3xl font-bold mb-4">Test de Mémoire de Séquence</h1>
-            <p className="mb-8">
-              Mémorisez la séquence qui s'affiche et reproduisez-la dans le même ordre.
-              À chaque niveau, la séquence s'allonge d'un clic.
-              Vous avez trois vies.
-            </p>
-            <button 
-              className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-              onClick={startGame}
-            >
-              Commencer
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
-              <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                <div className="text-2xl">Niveau {level}</div>
-                <div className="flex gap-1">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <span key={i} className="text-2xl">
-                      {i < (3 - lives) ? '🖤' : '❤️'}
-                    </span>
-                  ))}
+      <div className="min-h-screen bg-gray-100 p-4">
+        <div className="max-w-screen-xl mx-auto mt-20">
+          {gameStatus === 'waiting' ? (
+            <div className="flex flex-col items-center justify-center space-y-8 max-w-2xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire de Séquence</h1>
+                <p className="mb-8 text-center">
+                  Mémorisez la séquence qui s'affiche et reproduisez-la dans le même ordre.
+                  À chaque niveau, la séquence s'allonge d'un clic.
+                  Vous avez trois vies.
+                </p>
+                <div className="flex justify-center">
+                  <button 
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                    onClick={startGame}
+                  >
+                    Commencer
+                  </button>
+                </div>
+              </div>
+              
+              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h2 className="text-2xl font-bold mb-4 text-center">Statistiques</h2>
+                <div className="h-[400px]">
+                  <Line data={prepareChartData(results)} options={chartOptions} />
                 </div>
               </div>
             </div>
+          ) : (
+            <>
+              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+                <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                  <div className="text-2xl">Niveau {level}</div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <span key={i} className="text-2xl">
+                        {i < (3 - lives) ? '🖤' : '❤️'}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-24">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleTileClick(index)}
-                  disabled={isShowingSequence}
-                  className={`
-                    w-24 h-24 rounded-xl transition-all duration-200
-                    ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
-                    ${correctTiles.includes(index) ? 'bg-green-500' : ''}
-                    ${errorTile === index ? 'bg-red-500' : ''}
-                    ${clickedTile === index ? 'scale-95 opacity-70' : ''}
-                    ${!activeIndex && !correctTiles.includes(index) && errorTile !== index && clickedTile !== index ? 'bg-gray-200 hover:bg-gray-300' : ''}
-                    disabled:cursor-not-allowed
-                  `}
-                />
-              ))}
-            </div>
-          </>
-        )}
+              <div className="flex justify-center items-center min-h-screen">
+                <div className="grid grid-cols-3 gap-4">
+                  {Array.from({ length: 9 }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleTileClick(index)}
+                      disabled={isShowingSequence}
+                      className={`
+                        w-24 h-24 rounded-xl transition-all duration-200
+                        ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
+                        ${correctTiles.includes(index) ? 'bg-green-500' : ''}
+                        ${errorTile === index ? 'bg-red-500' : ''}
+                        ${clickedTile === index ? 'scale-95 opacity-70' : ''}
+                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index && clickedTile !== index ? 'bg-gray-200 hover:bg-gray-300' : ''}
+                        disabled:cursor-not-allowed
+                      `}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
-        {gameStatus === 'gameover' && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-2xl text-center">
-              <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-              <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
-              <button 
-                onClick={startGame}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-              >
-                Rejouer
-              </button>
+          {gameStatus === 'gameover' && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white p-8 rounded-2xl text-center">
+                <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
+                <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+                <div className="flex gap-4 justify-center">
+                  <button 
+                    onClick={startGame}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                  >
+                    Rejouer
+                  </button>
+                  <button 
+                    onClick={() => setGameStatus('waiting')}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                  >
+                    Retour
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );
-} 
+}

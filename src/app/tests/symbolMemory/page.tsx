@@ -27,6 +27,58 @@ ChartJS.register(
 // Symboles possibles pour les cartes (emojis)
 const SYMBOLS = ['🌟', '🎈', '🎨', '🎭', '🎪', '🎯', '🎲', '🎳', '🎮', '🎸', '🎺', '🎨', '🎭', '🎪'];
 
+const prepareChartData = (results: Array<{ score: number }>) => {
+  const scores = results.map(r => r.score);
+  
+  // Calculer les occurrences pour chaque niveau de 1 à 10
+  const occurrences = Array.from({ length: 10 }, (_, i) => {
+    const level = i + 1;
+    const count = scores.filter(score => score === level).length;
+    return (count / scores.length) * 100 || 0;
+  });
+
+  return {
+    labels: Array.from({ length: 10 }, (_, i) => `Niveau ${i + 1}`),
+    datasets: [{
+      label: 'Distribution des scores (%)',
+      data: occurrences,
+      borderColor: 'rgb(75, 192, 192)',
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      tension: 0.3,
+      fill: true,
+    }],
+  };
+};
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Niveau atteint',
+      }
+    },
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: 'Pourcentage des parties (%)',
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      position: 'top' as const,
+    },
+    title: {
+      display: true,
+      text: 'Distribution des niveaux atteints',
+    },
+  },
+};
+
 export default function SymbolMemoryTest() {
   const [level, setLevel] = useState(1);
   const [lives, setLives] = useState(3);
@@ -154,32 +206,12 @@ export default function SymbolMemoryTest() {
     }
   };
 
-  const prepareChartData = () => {
-    return {
-      labels: results.map((_, i) => `Partie ${i + 1}`),
-      datasets: [
-        {
-          label: 'Niveau atteint',
-          data: results.map((r: { score: number }) => r.score),
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.3,
-          fill: false,
-        },
-      ],
-    };
-  };
-
-  const chartOptions = {
-    responsive: true,
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Niveau',
-        }
-      }
-    },
+  const handleRestart = () => {
+    setGameStatus('waiting');
+    setLevel(1);
+    setLives(3);
+    setSelectedCards([]);
+    setCards([]);
   };
 
   useEffect(() => {
@@ -211,7 +243,7 @@ export default function SymbolMemoryTest() {
               <p className="mb-8">
                 Mémorisez la position des paires de symboles.
                 Retrouvez toutes les paires pour passer au niveau suivant.
-                Attention, vous n'avez que trois vies !
+                Attention, vous n&apos;avez que trois vies !
               </p>
               <button 
                 className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
@@ -222,8 +254,10 @@ export default function SymbolMemoryTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <Line data={prepareChartData()} options={chartOptions} />
+              <div className="w-full max-w-2xl mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                <div className="h-[400px]">
+                  <Line data={prepareChartData(results)} options={chartOptions} />
+                </div>
               </div>
             )}
           </div>
@@ -279,10 +313,10 @@ export default function SymbolMemoryTest() {
                   <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
                   <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
                   <button 
-                    onClick={startGame}
+                    onClick={handleRestart}
                     className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
                   >
-                    Rejouer
+                    Retour aux règles
                   </button>
                 </div>
               </div>
@@ -292,4 +326,4 @@ export default function SymbolMemoryTest() {
       </div>
     </>
   );
-} 
+}

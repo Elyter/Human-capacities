@@ -34,7 +34,7 @@ const capacityTests = [
   {
     title: "Mémoire des Symboles",
     description: "Retrouvez les paires de symboles cachés",
-    image: "/symbol.svg",
+    image: "/cards.svg",
     link: "/tests/symbolMemory"
   },
   {
