@@ -64,7 +64,6 @@ export default function TypingSpeed() {
   const [wordCount, setWordCount] = useState(0)
   const [isFinished, setIsFinished] = useState(false)
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
-  const [shuffledWords, setShuffledWords] = useState<string[]>([])
   const [words, setWords] = useState<WordStatus[]>([])
   const [currentLine, setCurrentLine] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null)
@@ -127,10 +126,10 @@ export default function TypingSpeed() {
     }
   }
 
-  const shuffleWords = () => {
+  const shuffleWords = (): WordStatus[] => {
     return WORD_LIST.sort(() => Math.random() - 0.5).map(word => ({
       text: word,
-      status: 'waiting'
+      status: 'waiting' as const
     }))
   }
 
@@ -144,7 +143,6 @@ export default function TypingSpeed() {
     setIsFinished(false)
     setCurrentInput('')
     setCurrentWordIndex(0)
-    setShuffledWords(shuffleWords())
     if (inputRef.current) {
       inputRef.current.focus()
     }
@@ -191,30 +189,33 @@ export default function TypingSpeed() {
   }
 
   const prepareChartData = () => {
-    const intervals = [0, 20, 40, 60, 80, 100]
-    const counts = new Array(intervals.length - 1).fill(0)
-    const total = results.length
+    // Créer des intervalles de 10 en 10 jusqu'à 140
+    const intervals = Array.from({ length: 15 }, (_, i) => i * 10)
+    const counts = new Array(intervals.length).fill(0)
 
+    // Compter le nombre de résultats pour chaque intervalle
     results.forEach(result => {
-      for (let i = 0; i < intervals.length - 1; i++) {
-        if (result.score >= intervals[i] && result.score < intervals[i + 1]) {
-          counts[i]++
-          break
-        }
+      const intervalIndex = Math.floor(result.score / 10)
+      if (intervalIndex >= 0 && intervalIndex < intervals.length) {
+        counts[intervalIndex]++
       }
     })
 
-    const data = {
-      labels: intervals.slice(0, -1).map(i => `${i}-${i + 20} mpm`),
+    // Calculer les pourcentages
+    const total = results.length
+    const percentages = counts.map(count => (count / total) * 100 || 0)
+
+    return {
+      labels: intervals.map(value => `${value} mpm`),
       datasets: [{
         label: 'Distribution des scores',
-        data: counts.map(count => (count / total) * 100 || 0),
+        data: percentages,
         borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1,
+        fill: true
       }]
     }
-
-    return data
   }
 
   const chartOptions = {
@@ -233,7 +234,13 @@ export default function TypingSpeed() {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Pourcentage'
+          text: 'Pourcentage des joueurs'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Mots par minute'
         }
       }
     }
