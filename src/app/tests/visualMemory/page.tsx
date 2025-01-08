@@ -40,6 +40,7 @@ export default function VisualMemoryTest() {
 
   const gridSize = Math.min(3 + Math.floor(level / 2), 7)
   const tilesToRemember = Math.min(3 + level, gridSize * gridSize - 1)
+  const SEQUENCE_SHOW_TIME = 2200 // 3 secondes
 
   const generateSequence = () => {
     const newSequence: number[] = []
@@ -54,14 +55,13 @@ export default function VisualMemoryTest() {
     setCorrectTiles([])
     setErrorTiles([])
     setUserSequence([])
-    setMistakes(0)
     
     // Délai avant d'afficher la nouvelle séquence pour effacer les tuiles
     setTimeout(() => {
       const newSequence = generateSequence()
       setSequence(newSequence)
       setIsShowingSequence(true)
-      setTimeout(() => setIsShowingSequence(false), 3000)
+      setTimeout(() => setIsShowingSequence(false), SEQUENCE_SHOW_TIME)
     }, 1000)
   }
 
@@ -74,28 +74,32 @@ export default function VisualMemoryTest() {
     if (isShowingSequence || gameOver) return
 
     if (!sequence.includes(index)) {
-      const newMistakes = mistakes + 1
-      setMistakes(newMistakes)
+      // Mauvaise tuile : perd une vie immédiatement
+      const newLives = lives - 1
+      setLives(newLives)
       setErrorTiles(prev => [...prev, index])
       
-      if (newMistakes >= 3) {
-        setLives(prev => prev - 1)
-        if (lives <= 1) {
-          setGameOver(true)
-          saveResult(score) // Sauvegarder le score final
-        } else {
-          startLevel() // Démarrage immédiat du nouveau niveau
-        }
+      
+      if (newLives <= 0) {
+        setGameOver(true)
+        saveResult(score)
+      } else {
+        // S'il reste des vies, on recommence le niveau avec une nouvelle séquence
+        setTimeout(() => {
+          startLevel()
+        }, 500) // Petit délai pour voir la tuile rouge
       }
     } else if (!userSequence.includes(index)) {
+      // Bonne tuile
       const newUserSequence = [...userSequence, index]
       setUserSequence(newUserSequence)
       setCorrectTiles(prev => [...prev, index])
       
       if (newUserSequence.length === sequence.length) {
+        // Niveau réussi
         setScore(prev => prev + level)
         setLevel(prev => prev + 1)
-        startLevel() // Le niveau suivant commencera avec un délai grâce au setTimeout dans startLevel
+        startLevel() // Passer au niveau suivant
       }
     }
   }
@@ -174,7 +178,7 @@ export default function VisualMemoryTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -192,69 +196,108 @@ export default function VisualMemoryTest() {
         </svg>
       </Link>
 
-      <div className={styles.container}>
-        {!isStarted ? (
-          <div className="min-h-screen flex flex-col items-center justify-center">
-            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4">Test de Mémoire Visuelle</h1>
-              <p className="mb-8">
-                Testez votre mémoire visuelle.
-                Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
-                Reproduisez la séquence pour passer au niveau suivant.
-                Vous avez droit à trois erreurs par niveau.
-              </p>
-              <button 
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                onClick={startGame}
+      <div className="min-h-screen bg-gray-100 p-4">
+        <div className="max-w-screen-xl mx-auto mt-20">
+          {!isStarted ? (
+            <div className="flex flex-col items-center justify-center space-y-8 max-w-2xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire Visuelle</h1>
+                <p className="mb-8 text-center">
+                  Testez votre mémoire visuelle.
+                  Des tuiles vont s'illuminer brièvement à l'écran.
+                  Reproduisez la séquence pour passer au niveau suivant.
+                  Vous avez droit à trois erreurs par niveau.
+                </p>
+                <div className="flex justify-center">
+                  <button 
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                    onClick={startGame}
+                  >
+                    Commencer
+                  </button>
+                </div>
+              </div>
+              
+              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h2 className="text-2xl font-bold mb-4 text-center">Statistiques</h2>
+                <div className="h-[400px]">
+                  <Line data={prepareChartData()} options={chartOptions} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+                <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                  <div className="text-2xl">Niveau {level}</div>
+                  <div className="flex gap-1">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <span key={i} className="text-2xl">
+                        {i < (3 - lives) ? '🖤' : '❤️'}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="text-2xl">Score: {score}</div>
+                </div>
+                {isShowingSequence && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1">
+                    <div className="progress-bar" style={{ animationDuration: `${SEQUENCE_SHOW_TIME}ms` }} />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-2 w-[min(90vw,500px)] aspect-square mx-auto mt-32" 
+                style={{ 
+                  gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                  pointerEvents: isShowingSequence ? 'none' : 'auto'
+                }}
               >
-                Commencer
-              </button>
-            </div>
-
-            {results.length > 0 && (
-              <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <Line data={prepareChartData()} options={chartOptions} />
+                {Array.from({ length: gridSize * gridSize }).map((_, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleTileClick(index)}
+                    className={`
+                      aspect-square rounded-xl transition-colors cursor-pointer backdrop-blur-sm shadow-lg
+                      ${isShowingSequence && sequence.includes(index) 
+                        ? 'bg-blue-500' 
+                        : correctTiles.includes(index)
+                          ? 'bg-green-500'
+                          : errorTiles.includes(index)
+                            ? 'bg-red-500'
+                            : 'bg-white/80 hover:bg-gray-100'
+                      }
+                    `}
+                  />
+                ))}
               </div>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className={styles.stats}>
-              <div>Vies : {Array(lives).fill('❤️').join(' ')}</div>
-              <div>Niveau : {level}</div>
-              <div>Score : {score}</div>
-            </div>
 
-            <div 
-              className={styles.grid}
-              style={{ 
-                gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                pointerEvents: isShowingSequence ? 'none' : 'auto'
-              }}
-            >
-              {Array.from({ length: gridSize * gridSize }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`${styles.tile} ${
-                    isShowingSequence && sequence.includes(index) ? styles.active : ''
-                  } ${correctTiles.includes(index) ? styles.correct : ''} ${
-                    errorTiles.includes(index) ? styles.error : ''
-                  }`}
-                  onClick={() => handleTileClick(index)}
-                />
-              ))}
-            </div>
-
-            {gameOver && (
-              <div className={styles.gameOver}>
-                <h2>Partie Terminée !</h2>
-                <p>Score final : {score}</p>
-                <p>Niveau atteint : {level}</p>
-                <button onClick={() => window.location.reload()}>Rejouer</button>
-              </div>
-            )}
-          </>
-        )}
+              {gameOver && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                  <div className="bg-white p-8 rounded-2xl text-center">
+                    <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
+                    <p className="text-xl mb-6">Niveau atteint : {level}</p>
+                    <button 
+                      onClick={() => {
+                        setIsStarted(false);
+                        setGameOver(false);
+                        setLevel(1);
+                        setLives(3);
+                        setScore(0);
+                        setSequence([]);
+                        setUserSequence([]);
+                        setCorrectTiles([]);
+                        setErrorTiles([]);
+                      }}
+                      className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                    >
+                      Retour aux règles
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </>
   )
