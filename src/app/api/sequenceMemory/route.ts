@@ -22,7 +22,7 @@ async function readData() {
   }
 }
 
-async function writeData(data: any) {
+async function writeData(data: unknown) {
   await ensureFileExists();
   await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
 }
