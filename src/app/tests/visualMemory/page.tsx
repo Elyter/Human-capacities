@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import styles from './page.module.css'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,7 +31,6 @@ export default function VisualMemoryTest() {
   const [userSequence, setUserSequence] = useState<number[]>([])
   const [isShowingSequence, setIsShowingSequence] = useState(false)
   const [gameOver, setGameOver] = useState(false)
-  const [mistakes, setMistakes] = useState(0)
   const [correctTiles, setCorrectTiles] = useState<number[]>([])
   const [errorTiles, setErrorTiles] = useState<number[]>([])
   const [isStarted, setIsStarted] = useState(false)
@@ -204,7 +202,7 @@ export default function VisualMemoryTest() {
                 <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire Visuelle</h1>
                 <p className="mb-8 text-center">
                   Testez votre mémoire visuelle.
-                  Des tuiles vont s'illuminer brièvement à l'écran.
+                  Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
                   Reproduisez la séquence pour passer au niveau suivant.
                   Vous avez droit à trois erreurs par niveau.
                 </p>
