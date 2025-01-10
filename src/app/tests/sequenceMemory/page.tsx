@@ -36,6 +36,7 @@ export default function SequenceMemoryTest() {
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [clickedTile, setClickedTile] = useState<number | null>(null);
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
+  const [isProcessingError, setIsProcessingError] = useState(false);
 
   const generateSequence = (currentLevel: number) => {
     if (currentLevel === 1) {
@@ -66,21 +67,19 @@ export default function SequenceMemoryTest() {
     setUserSequence([]);
     setCorrectTiles([]);
     setErrorTile(null);
+    setIsProcessingError(false);
     
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     
-    // Délai initial
     await wait(500);
     
-    // Afficher chaque numéro de la séquence
     for (let i = 0; i < sequenceToShow.length; i++) {
       setActiveIndex(sequenceToShow[i]);
-      await wait(800); // Durée d'affichage de la tuile
+      await wait(800);
       setActiveIndex(null);
-      await wait(200); // Pause entre les tuiles
+      await wait(200);
     }
     
-    // Fin de la séquence
     setIsShowingSequence(false);
   };
 
@@ -89,23 +88,30 @@ export default function SequenceMemoryTest() {
     setGameStatus('waiting');
   };
 
+  const startLevel = () => {
+    setCorrectTiles([]);
+    setErrorTile(null);
+    setUserSequence([]);
+    setIsProcessingError(false);
+    const newSequence = generateSequence(level);
+    setSequence(newSequence);
+    showSequence(newSequence);
+  };
+
   const handleTileClick = (index: number) => {
-    if (isShowingSequence || gameStatus !== 'playing') return;
+    if (isShowingSequence || gameStatus !== 'playing' || isProcessingError) return;
 
-    // Effet visuel immédiat au clic
-    setClickedTile(index);
-    setTimeout(() => setClickedTile(null), 200);
-
-    const currentIndex = userSequence.length;
-    
-    if (index === sequence[currentIndex]) {
-      // Bonne tuile - effet temporaire
+    if (index === sequence[userSequence.length]) {
+      // Bonne tuile
       setCorrectTiles(prev => [...prev, index]);
       setTimeout(() => setCorrectTiles([]), 200);
       
-      setUserSequence(prev => [...prev, index]);
+      const newUserSequence = [...userSequence, index];
+      setUserSequence(newUserSequence);
 
-      if (userSequence.length + 1 === sequence.length) {
+      // Si la séquence est complète, on désactive immédiatement les clics
+      if (newUserSequence.length === sequence.length) {
+        setIsProcessingError(true); // Utilise isProcessingError pour bloquer les clics
         setTimeout(() => {
           setLevel(prev => prev + 1);
           const newSequence = generateSequence(level + 1);
@@ -116,19 +122,23 @@ export default function SequenceMemoryTest() {
       }
     } else {
       // Mauvaise tuile
+      setIsProcessingError(true);
       setErrorTile(index);
-      setTimeout(() => setErrorTile(null), 200);
-      setLives(prev => prev - 1);
+      const newLives = lives - 1;
+      setLives(newLives);
       
-      setTimeout(() => {
-        if (lives <= 1) {
-          setGameStatus('gameover');
-          handleGameOver();
-        } else {
+      if (newLives <= 0) {
+        setGameStatus('gameover');
+        saveResult(level - 1);
+      } else {
+        setTimeout(() => {
+          setErrorTile(null);
           setUserSequence([]);
-          showSequence(sequence); // Rejouer la même séquence au même niveau
-        }
-      }, 500);
+          setCorrectTiles([]);
+          setIsProcessingError(false);
+          showSequence(sequence);
+        }, 500);
+      }
     }
   };
 
@@ -289,14 +299,13 @@ export default function SequenceMemoryTest() {
                     <button
                       key={index}
                       onClick={() => handleTileClick(index)}
-                      disabled={isShowingSequence}
+                      disabled={isShowingSequence || isProcessingError}
                       className={`
                         w-24 h-24 rounded-xl transition-all duration-200
                         ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
                         ${correctTiles.includes(index) ? 'bg-green-500' : ''}
                         ${errorTile === index ? 'bg-red-500' : ''}
-                        ${clickedTile === index ? 'scale-95 opacity-70' : ''}
-                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index && clickedTile !== index ? 'bg-gray-200 hover:bg-gray-300' : ''}
+                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index ? 'bg-gray-200 hover:bg-gray-300' : ''}
                         disabled:cursor-not-allowed
                       `}
                     />
@@ -305,31 +314,34 @@ export default function SequenceMemoryTest() {
               </div>
             </>
           )}
-
-          {gameStatus === 'gameover' && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white p-8 rounded-2xl text-center">
-                <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-                <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
-                <div className="flex gap-4 justify-center">
-                  <button 
-                    onClick={startGame}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                  >
-                    Rejouer
-                  </button>
-                  <button 
-                    onClick={() => setGameStatus('waiting')}
-                    className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
-                  >
-                    Retour
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {gameStatus === 'gameover' && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-2xl text-center">
+            <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
+            <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => {
+                  setGameStatus('waiting');
+                  setLevel(1);
+                  setLives(3);
+                  setSequence([]);
+                  setUserSequence([]);
+                  setCorrectTiles([]);
+                  setErrorTile(null);
+                  setIsShowingSequence(false);
+                }}
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+              >
+                Retour aux règles
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
