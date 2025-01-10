@@ -35,10 +35,11 @@ export default function VisualMemoryTest() {
   const [errorTiles, setErrorTiles] = useState<number[]>([])
   const [isStarted, setIsStarted] = useState(false)
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([])
+  const [isProcessingError, setIsProcessingError] = useState(false)
 
   const gridSize = Math.min(3 + Math.floor(level / 2), 7)
   const tilesToRemember = Math.min(3 + level, gridSize * gridSize - 1)
-  const SEQUENCE_SHOW_TIME = 2200 // 3 secondes
+  const SEQUENCE_SHOW_TIME = 2200 // 2,2 secondes
 
   const generateSequence = () => {
     const newSequence: number[] = []
@@ -54,13 +55,15 @@ export default function VisualMemoryTest() {
     setErrorTiles([])
     setUserSequence([])
     
-    // Délai avant d'afficher la nouvelle séquence pour effacer les tuiles
+    const newSequence = generateSequence()
+    setSequence(newSequence)
+    setIsShowingSequence(true)
+    
+    // La séquence se termine après SEQUENCE_SHOW_TIME
     setTimeout(() => {
-      const newSequence = generateSequence()
-      setSequence(newSequence)
-      setIsShowingSequence(true)
-      setTimeout(() => setIsShowingSequence(false), SEQUENCE_SHOW_TIME)
-    }, 1000)
+      setIsShowingSequence(false)
+      setIsProcessingError(false) // Réactive les clics uniquement après la séquence
+    }, SEQUENCE_SHOW_TIME)
   }
 
   const startGame = () => {
@@ -69,23 +72,24 @@ export default function VisualMemoryTest() {
   }
 
   const handleTileClick = (index: number) => {
-    if (isShowingSequence || gameOver) return
+    if (isShowingSequence || gameOver || isProcessingError) return
 
     if (!sequence.includes(index)) {
       // Mauvaise tuile : perd une vie immédiatement
+      setIsProcessingError(true)
       const newLives = lives - 1
       setLives(newLives)
       setErrorTiles(prev => [...prev, index])
-      
       
       if (newLives <= 0) {
         setGameOver(true)
         saveResult(score)
       } else {
-        // S'il reste des vies, on recommence le niveau avec une nouvelle séquence
+        // Attend 500ms avec la tuile rouge visible
         setTimeout(() => {
+          // Démarre directement la nouvelle séquence
           startLevel()
-        }, 500) // Petit délai pour voir la tuile rouge
+        }, 500)
       }
     } else if (!userSequence.includes(index)) {
       // Bonne tuile
@@ -97,7 +101,7 @@ export default function VisualMemoryTest() {
         // Niveau réussi
         setScore(prev => prev + level)
         setLevel(prev => prev + 1)
-        startLevel() // Passer au niveau suivant
+        startLevel()
       }
     }
   }
@@ -247,7 +251,7 @@ export default function VisualMemoryTest() {
               <div className="grid gap-2 w-[min(90vw,500px)] aspect-square mx-auto mt-32" 
                 style={{ 
                   gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                  pointerEvents: isShowingSequence ? 'none' : 'auto'
+                  pointerEvents: isShowingSequence || isProcessingError ? 'none' : 'auto'
                 }}
               >
                 {Array.from({ length: gridSize * gridSize }).map((_, index) => (
