@@ -61,33 +61,27 @@ export default function SequenceMemoryTest() {
     showSequence(initialSequence);
   };
 
-  const showSequence = (sequenceToShow: number[]) => {
+  const showSequence = async (sequenceToShow: number[]) => {
     setIsShowingSequence(true);
     setUserSequence([]);
     setCorrectTiles([]);
     setErrorTile(null);
     
-    let currentIndex = 0;
+    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     
-    const showNext = () => {
-      if (currentIndex >= sequenceToShow.length) {
-        setActiveIndex(null);
-        setIsShowingSequence(false);
-        return;
-      }
-      
-      setActiveIndex(sequenceToShow[currentIndex]);
-      
-      setTimeout(() => {
-        setActiveIndex(null);
-        setTimeout(() => {
-          currentIndex++;
-          showNext();
-        }, 200); // Pause entre chaque numéro
-      }, 800); // Durée d'affichage de chaque numéro
-    };
+    // Délai initial
+    await wait(500);
     
-    setTimeout(() => showNext(), 500); // Délai initial
+    // Afficher chaque numéro de la séquence
+    for (let i = 0; i < sequenceToShow.length; i++) {
+      setActiveIndex(sequenceToShow[i]);
+      await wait(800); // Durée d'affichage de la tuile
+      setActiveIndex(null);
+      await wait(200); // Pause entre les tuiles
+    }
+    
+    // Fin de la séquence
+    setIsShowingSequence(false);
   };
 
   const handleGameOver = () => {
