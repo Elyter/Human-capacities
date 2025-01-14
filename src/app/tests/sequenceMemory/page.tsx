@@ -34,7 +34,6 @@ export default function SequenceMemoryTest() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [correctTiles, setCorrectTiles] = useState<number[]>([]);
   const [errorTile, setErrorTile] = useState<number | null>(null);
-  const [clickedTile, setClickedTile] = useState<number | null>(null);
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
   const [isProcessingError, setIsProcessingError] = useState(false);
 
@@ -81,21 +80,6 @@ export default function SequenceMemoryTest() {
     }
     
     setIsShowingSequence(false);
-  };
-
-  const handleGameOver = () => {
-    saveResult(level - 1);
-    setGameStatus('waiting');
-  };
-
-  const startLevel = () => {
-    setCorrectTiles([]);
-    setErrorTile(null);
-    setUserSequence([]);
-    setIsProcessingError(false);
-    const newSequence = generateSequence(level);
-    setSequence(newSequence);
-    showSequence(newSequence);
   };
 
   const handleTileClick = (index: number) => {
