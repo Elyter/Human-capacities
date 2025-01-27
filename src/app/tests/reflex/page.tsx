@@ -279,7 +279,7 @@ export default function ReflexTest() {
                   Votre temps de réaction : {reactionTime} ms
                 </p>
                 <p className="mt-2 text-gray-600 dark:text-gray-200">
-                  Cliquez n'importe où pour réessayer
+                  Cliquez n&apos;importe où pour réessayer
                 </p>
               </div>
             )}
