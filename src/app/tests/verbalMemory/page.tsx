@@ -75,7 +75,6 @@ export default function VerbalMemoryTest() {
   };
 
   const prepareChartData = () => {
-    // Définir les intervalles pour les scores
     const intervals = Array.from({ length: 10 }, (_, i) => i * 10);
     const data = new Array(intervals.length).fill(0);
     const total = results.length;
@@ -87,7 +86,6 @@ export default function VerbalMemoryTest() {
       }
     });
 
-    // Convertir en pourcentages
     const percentages = data.map(count => (count / total) * 100 || 0);
 
     return {
@@ -96,7 +94,9 @@ export default function VerbalMemoryTest() {
         label: 'Distribution des scores (%)',
         data: percentages,
         borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.3,
+        fill: true,
       }]
     };
   };
@@ -105,20 +105,29 @@ export default function VerbalMemoryTest() {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Intervalles de score',
+        }
+      },
       y: {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Pourcentage'
-        }
+          text: 'Pourcentage des parties (%)',
+        },
       },
-      x: {
-        title: {
-          display: true,
-          text: 'Intervalles de score'
-        }
-      }
-    }
+    },
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Distribution des scores',
+      },
+    },
   };
 
   const choisirNouveauMot = () => {
@@ -188,7 +197,7 @@ export default function VerbalMemoryTest() {
 
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="min-h-screen flex flex-col items-center justify-center">
+          <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
             <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
               <h1 className="text-3xl font-bold mb-4">Test de Mémoire Verbale</h1>
               <p className="mb-8">
@@ -205,7 +214,7 @@ export default function VerbalMemoryTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <div className="w-[600px] h-[400px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <Line data={prepareChartData()} options={chartOptions} />
               </div>
             )}
@@ -228,16 +237,16 @@ export default function VerbalMemoryTest() {
             <div className="flex flex-col items-center justify-center gap-8 pt-24">
               <div className="text-4xl font-bold mb-8">{motCourant}</div>
               
-              <div className="flex gap-4">
+              <div className="flex gap-6">
                 <button 
                   onClick={() => handleReponse(true)}
-                  className="px-8 py-4 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-colors text-xl"
+                  className="px-10 py-5 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95"
                 >
                   DÉJÀ VU
                 </button>
                 <button 
                   onClick={() => handleReponse(false)}
-                  className="px-8 py-4 bg-gray-400 text-white rounded-xl hover:bg-gray-500 transition-colors text-xl"
+                  className="px-10 py-5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95"
                 >
                   NOUVEAU
                 </button>
@@ -252,10 +261,10 @@ export default function VerbalMemoryTest() {
               <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
               <p className="text-xl mb-6">Score final : {score}</p>
               <button 
-                onClick={startGame}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                onClick={() => setGameStatus('waiting')}
+                className="px-6 py-3 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Rejouer
+                Retour aux règles
               </button>
             </div>
           </div>

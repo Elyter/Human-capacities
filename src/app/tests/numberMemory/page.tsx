@@ -73,12 +73,14 @@ export default function NumberMemoryTest() {
         const percentages = data.map(count => (count / totalResults) * 100);
 
         return {
-            labels: intervals.map(i => `${i} chiffres`),
+            labels: intervals.map(i => `Niveau ${i}`),
             datasets: [{
-                label: 'Pourcentage des scores',
+                label: 'Distribution des scores (%)',
                 data: percentages,
                 borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: true,
             }]
         };
     };
@@ -87,20 +89,29 @@ export default function NumberMemoryTest() {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Niveau atteint',
+                }
+            },
             y: {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Pourcentage des parties'
-                }
-            }
+                    text: 'Pourcentage des parties (%)',
+                },
+            },
         },
         plugins: {
+            legend: {
+                position: 'top' as const,
+            },
             title: {
                 display: true,
-                text: 'Distribution des scores'
-            }
-        }
+                text: 'Distribution des niveaux atteints',
+            },
+        },
     };
 
     const generateNumbers = (level: number) => {
@@ -178,7 +189,7 @@ export default function NumberMemoryTest() {
                 </svg>
             </Link>
 
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+            <div className="h-full min-h-[100vh] bg-gray-100 flex items-center justify-center">
                 {gameStatus !== 'waiting' && (
                     <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
                         <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
@@ -199,7 +210,7 @@ export default function NumberMemoryTest() {
                 )}
 
                 {gameStatus === 'waiting' ? (
-                    <div className="min-h-screen flex flex-col items-center justify-center">
+                    <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
                         <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                             <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Chiffres</h1>
                             <p className="mb-8">
@@ -216,15 +227,17 @@ export default function NumberMemoryTest() {
                         </div>
 
                         {results.length > 0 && (
-                            <div className="absolute top-full -mt-24 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                                <Line data={prepareChartData()} options={chartOptions} />
+                            <div className="w-full max-w-2xl mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                                <div className="h-[400px]">
+                                    <Line data={prepareChartData()} options={chartOptions} />
+                                </div>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center min-h-screen gap-4 mt-20">
+                    <div className="flex flex-col items-center justify-center h-full min-h-[100vh] gap-4 pt-20">
                         {isShowingNumbers ? (
-                            <div className="text-8xl font-bold">{numbers}</div>
+                            <div className="text-8xl font-bold select-none pointer-events-none">{numbers}</div>
                         ) : (
                             <div className="flex flex-col items-center gap-4">
                                 <input

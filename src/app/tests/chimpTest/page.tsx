@@ -43,6 +43,7 @@ export default function ChimpTest() {
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [clickedTile, setClickedTile] = useState<number | null>(null);
   const [results, setResults] = useState<TestResult[]>([]);
+  const [canClick, setCanClick] = useState(true);
 
   // Charger les résultats au montage du composant
   useEffect(() => {
@@ -168,6 +169,7 @@ export default function ChimpTest() {
     setStrikes(0);
     setScore(0);
     setGameStatus('playing');
+    setCanClick(true);
     startNewLevel();
   };
 
@@ -179,10 +181,11 @@ export default function ChimpTest() {
     setNumbersVisible(true);
     setCorrectTiles([]);
     setErrorTile(null);
+    setCanClick(true);
   };
 
   const handleTileClick = (position: number) => {
-    if (gameStatus !== 'playing') return;
+    if (gameStatus !== 'playing' || !canClick) return;
 
     setClickedTile(position);
     setTimeout(() => setClickedTile(null), 200);
@@ -212,7 +215,8 @@ export default function ChimpTest() {
         }, 500);
       }
     } else {
-      // Erreur
+      // Désactive les clics pendant l'animation d'erreur
+      setCanClick(false);
       setErrorTile(position);
       setStrikes(prev => prev + 1);
       if (strikes >= 2) {
@@ -223,6 +227,7 @@ export default function ChimpTest() {
           setNumbersVisible(true);
           setCorrectTiles([]);
           setErrorTile(null);
+          setCanClick(true); // Réactive les clics
         }, 500);
       }
     }
@@ -272,27 +277,30 @@ export default function ChimpTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="text-center max-w-4xl w-full bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-            <h1 className="text-3xl font-bold mb-4">Test du Chimpanzé</h1>
-            <p className="mb-4">
-              Les chimpanzés surpassent systématiquement les humains dans ce test de mémoire.
-              Certains peuvent mémoriser 9 chiffres avec plus de 90% de réussite.
-            </p>
-            
+          <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4">Test du Chimpanzé</h1>
+              <p className="mb-8">
+                Les chimpanzés surpassent systématiquement les humains dans ce test de mémoire.
+                Certains peuvent mémoriser 9 chiffres avec plus de 90% de réussite.
+              </p>
+              <button 
+                onClick={startGame}
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+              >
+                Commencer
+              </button>
+            </div>
+
             {results.length > 0 && (
-              <div className="h-64 mb-8">
-                <Line data={prepareChartData()} options={chartOptions} />
+              <div className="w-full max-w-2xl mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                <div className="h-[400px]">
+                  <Line data={prepareChartData()} options={chartOptions} />
+                </div>
               </div>
             )}
-
-            <button 
-              onClick={startGame}
-              className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-            >
-              Commencer
-            </button>
           </div>
         ) : (
           <>

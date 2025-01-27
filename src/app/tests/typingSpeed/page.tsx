@@ -11,6 +11,7 @@ import {
   Legend
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import Link from 'next/link'
 
 ChartJS.register(
   CategoryScale,
@@ -247,76 +248,119 @@ export default function TypingSpeed() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-3xl font-bold mb-8">Test de Vitesse de Frappe</h1>
-      
-      {!isStarted && !isFinished && (
-        <button 
-          onClick={handleStart}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    <>
+      <Link 
+        href="/"
+        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+      >
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          className="h-6 w-6" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
         >
-          Démarrer le test
-        </button>
-      )}
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      </Link>
 
-      {isStarted && (
-        <div className="w-full max-w-3xl">
-          <div className="text-xl mb-4">Temps restant: {timeLeft} secondes</div>
-          <div 
-            ref={containerRef}
-            className="text-lg mb-4 bg-white p-4 rounded shadow-md h-[200px] overflow-hidden"
-          >
-            <div className="flex flex-col gap-2">
-              {getVisibleLines().map((line, lineIndex) => (
-                <div key={lineIndex} className="flex flex-wrap gap-2">
-                  {line.map((word, wordIndex) => (
-                    <span
-                      key={wordIndex}
-                      className={`inline-block px-2 py-1 rounded ${
-                        word.status === 'current' ? 'bg-blue-200 text-blue-800' :
-                        word.status === 'correct' ? 'bg-green-200 text-green-800' :
-                        word.status === 'incorrect' ? 'bg-red-200 text-red-800' :
-                        'text-gray-700'
-                      }`}
-                    >
-                      {word.text}
-                    </span>
-                  ))}
-                </div>
-              ))}
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        {!isStarted && !isFinished ? (
+          <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
+            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4">Test de Vitesse de Frappe</h1>
+              <p className="mb-8">
+                Tapez les mots qui apparaissent à l&apos;écran aussi vite et précisément que possible.
+                Vous avez 60 secondes pour taper le maximum de mots.
+                Votre score final sera le nombre de mots correctement tapés par minute.
+              </p>
+              <button 
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                onClick={handleStart}
+              >
+                Commencer
+              </button>
             </div>
+
+            {results.length > 0 && (
+              <div className="w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                <Line data={prepareChartData()} options={chartOptions} />
+              </div>
+            )}
           </div>
-          <input
-            ref={inputRef}
-            type="text"
-            value={currentInput}
-            onChange={handleInput}
-            className="w-full p-2 border-2 border-gray-300 rounded"
-            placeholder="Tapez les mots ici..."
-            disabled={!isStarted}
-          />
-          <div className="mt-4">Mots corrects: {wordCount}</div>
-        </div>
-      )}
+        ) : (
+          <div className="w-full">
+            {isStarted && (
+              <>
+                <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+                  <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                    <div className="text-2xl">Temps: {timeLeft}s</div>
+                    <div className="text-2xl">Score: {wordCount}</div>
+                  </div>
+                </div>
 
-      {isFinished && (
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Test terminé!</h2>
-          <p className="text-xl">Votre vitesse: {wordCount} mots par minute</p>
-          <button 
-            onClick={handleStart}
-            className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Recommencer
-          </button>
-        </div>
-      )}
+                <div className="flex flex-col items-center justify-center gap-8 pt-24 px-4">
+                  {/* Le reste du contenu du jeu */}
+                  <div className="w-full max-w-3xl">
+                    <div 
+                      ref={containerRef}
+                      className="text-lg mb-4 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg"
+                    >
+                      <div className="flex flex-col gap-2">
+                        {getVisibleLines().map((line, lineIndex) => (
+                          <div key={lineIndex} className="flex flex-wrap gap-2">
+                            {line.map((word, wordIndex) => (
+                              <span
+                                key={wordIndex}
+                                className={`inline-block px-2 py-1 rounded ${
+                                  word.status === 'current' ? 'bg-blue-200 text-blue-800' :
+                                  word.status === 'correct' ? 'bg-green-200 text-green-800' :
+                                  word.status === 'incorrect' ? 'bg-red-200 text-red-800' :
+                                  'text-gray-700'
+                                }`}
+                              >
+                                {word.text}
+                              </span>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={currentInput}
+                      onChange={handleInput}
+                      className="w-full p-4 border-2 border-gray-300 rounded-xl bg-white/80 backdrop-blur-sm"
+                      placeholder="Tapez les mots ici..."
+                      disabled={!isStarted}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
-      <div className="w-full max-w-3xl mt-8">
-        <div className="bg-white p-4 rounded shadow-md">
-          <Line data={prepareChartData()} options={chartOptions} />
-        </div>
+            {isFinished && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white p-8 rounded-2xl text-center">
+                  <h2 className="text-2xl font-bold mb-4">Test terminé !</h2>
+                  <p className="text-xl mb-6">Vitesse finale : {wordCount} mots par minute</p>
+                  <button 
+                    onClick={() => {
+                      setIsFinished(false);
+                      setCurrentWordIndex(0);
+                      setWords([]);
+                    }}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                  >
+                    Retour à l&apos;accueil
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   )
 }
