@@ -256,6 +256,11 @@ export default function VerbalMemoryTest() {
                   ))}
                 </div>
               </div>
+              {motCourant && (
+                <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200">
+                  <div className="progress-bar"></div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col items-center justify-center gap-8 pt-24">

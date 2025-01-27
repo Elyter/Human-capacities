@@ -60,7 +60,7 @@ export default function ReflexTest() {
   };
 
   const startTest = () => {
-    setBackgroundColor('gray');
+    setBackgroundColor('#4B5563'); // Gris plus foncé
     setReactionTime(null);
     setIsWaiting(true);
     setShowStart(false);
@@ -85,12 +85,12 @@ export default function ReflexTest() {
       return;
     }
 
-    if (backgroundColor === 'gray') {
+    if (backgroundColor === '#4B5563') { // Mettre à jour la condition
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       setTooEarly(true);
-      setBackgroundColor('red');
+      setBackgroundColor('#EF4444'); // Rouge plus vif
       setTimeout(() => {
         resetTest();
       }, 2000);
@@ -220,16 +220,18 @@ export default function ReflexTest() {
         </svg>
       </Link>
       <div
-        className={`flex flex-col items-center justify-center min-h-screen cursor-pointer bg-white dark:bg-gray-900 ${
-          backgroundColor !== 'transparent' ? 'override-background' : ''
+        className={`flex flex-col items-center ${
+          showStart ? 'justify-start' : 'justify-center'
+        } min-h-screen cursor-pointer transition-colors duration-200 ${
+          backgroundColor === 'transparent' ? 'bg-white dark:bg-gray-900' : ''
         }`}
         style={{ 
-          backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined 
+          backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
         }}
         onMouseDown={handleClick}
       >
         {showStart ? (
-          <div className="min-h-screen flex flex-col items-center justify-center">
+          <div className="w-full flex flex-col items-center py-12 gap-8">
             <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
               <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Réflexes</h1>
               <p className="mb-8 dark:text-gray-200">
@@ -246,35 +248,39 @@ export default function ReflexTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="absolute top-full -mt-52 w-[600px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <div className="w-[600px] max-w-[90vw] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <Line data={prepareChartData()} options={chartOptions} />
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center justify-center min-h-screen">
             {backgroundColor === 'green' && (
               <>
-                <div className="text-white text-6xl font-bold mb-4">
+                <div className="text-black dark:text-white text-6xl font-bold mb-4">
                   CLIC !
                 </div>
-                <div className="text-white text-3xl">
+                <div className="text-black dark:text-white text-3xl">
                   {currentTime} ms
                 </div>
               </>
             )}
-            {backgroundColor === 'gray' && !tooEarly && (
+            {backgroundColor === '#4B5563' && !tooEarly && (
               <p className="text-white text-xl">Attendez le signal vert...</p>
             )}
-            {tooEarly && (
+            {backgroundColor === '#EF4444' && (
               <div className="text-white text-4xl font-bold">
                 Trop tôt !
               </div>
             )}
             {reactionTime && reactionTime > 0 && (
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
-                <p className="text-xl dark:text-white">Votre temps de réaction : {reactionTime} ms</p>
-                <p className="mt-2 dark:text-gray-200">Cliquez n&apos;importe où pour réessayer</p>
+              <div className="bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg backdrop-blur-sm">
+                <p className="text-black dark:text-white text-xl">
+                  Votre temps de réaction : {reactionTime} ms
+                </p>
+                <p className="mt-2 text-gray-600 dark:text-gray-200">
+                  Cliquez n'importe où pour réessayer
+                </p>
               </div>
             )}
           </div>
