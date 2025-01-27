@@ -181,31 +181,28 @@ export default function VisualMemoryTest() {
     fetchResults()
   }, [])
 
-  // Modifiez la fonction calculateGridSize
   const calculateGridSize = () => {
-    // Calculer la taille maximale disponible pour la grille
+    if (typeof window === 'undefined') return 400; // Valeur par défaut pour SSR
+    
     const maxSize = Math.min(
-      window.innerWidth * 0.8,  // 80% de la largeur de l'écran
-      (window.innerHeight - 250) * 0.9  // 90% de la hauteur moins l'espace pour l'interface
+      window.innerWidth * 0.8,
+      (window.innerHeight - 250) * 0.9
     );
-    // S'assurer que la taille est un multiple du nombre de cases pour une division égale
     return Math.floor(Math.min(maxSize, 500) / gridSize) * gridSize;
   };
 
-  // Ajoutez un state pour la taille des tuiles individuelles
-  const [tileSize, setTileSize] = useState(() => calculateGridSize());
+  const [tileSize, setTileSize] = useState(400); // Valeur par défaut fixe
 
-  // Gardez uniquement cet effet qui gère à la fois le redimensionnement et les changements de niveau
   useEffect(() => {
+    setTileSize(calculateGridSize()); // Met à jour la taille une fois monté
+    
     const handleResize = () => {
-      const newSize = calculateGridSize();
-      setTileSize(newSize);
+      setTileSize(calculateGridSize());
     };
 
-    handleResize(); // Calcul initial
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [gridSize]); // gridSize comme dépendance
+  }, [gridSize]);
 
   return (
     <>
