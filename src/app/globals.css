@@ -53,3 +53,11 @@ body {
   background-color: rgb(59 130 246);
   animation: progress 5s linear forwards;
 }
+
+.override-background {
+  background-color: var(--game-background-color) !important;
+}
+
+[style*="backgroundColor"] {
+  --game-background-color: var(--background-override, inherit);
+}

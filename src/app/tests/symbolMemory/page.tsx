@@ -222,7 +222,7 @@ export default function SymbolMemoryTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -235,12 +235,12 @@ export default function SymbolMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
           <div className="min-h-screen flex flex-col items-center justify-center">
-            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Symboles</h1>
-              <p className="mb-8">
+            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire des Symboles</h1>
+              <p className="mb-8 dark:text-gray-200">
                 Mémorisez la position des paires de symboles.
                 Retrouvez toutes les paires pour passer au niveau suivant.
                 Attention, vous n&apos;avez que trois vies !
@@ -254,18 +254,42 @@ export default function SymbolMemoryTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="w-full max-w-2xl mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <div className="w-full max-w-2xl mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <div className="h-[400px]">
-                  <Line data={prepareChartData(results)} options={chartOptions} />
+                  <Line data={prepareChartData(results)} options={{
+                    ...chartOptions,
+                    plugins: {
+                      ...chartOptions.plugins,
+                      legend: {
+                        ...chartOptions.plugins.legend,
+                        labels: {
+                          color: 'rgb(156, 163, 175)'
+                        }
+                      }
+                    },
+                    scales: {
+                      ...chartOptions.scales,
+                      x: {
+                        ...chartOptions.scales.x,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      },
+                      y: {
+                        ...chartOptions.scales.y,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      }
+                    }
+                  }} />
                 </div>
               </div>
             )}
           </div>
         ) : (
           <>
-            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
               <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                <div className="text-2xl font-medium">Niveau {level}</div>
+                <div className="text-2xl font-medium dark:text-white">Niveau {level}</div>
                 <div className="flex gap-1">
                   {Array.from({ length: lives }).map((_, i) => (
                     <span key={i} className="text-2xl">❤️</span>
@@ -299,7 +323,7 @@ export default function SymbolMemoryTest() {
                     </div>
                   </div>
                   <div className="absolute w-full h-full backface-hidden rotate-y-180">
-                    <div className="w-full h-full bg-white shadow-lg rounded-xl flex items-center justify-center">
+                    <div className="w-full h-full bg-white dark:bg-gray-800 shadow-lg rounded-xl flex items-center justify-center dark:text-white">
                       {card.symbol}
                     </div>
                   </div>
@@ -309,9 +333,9 @@ export default function SymbolMemoryTest() {
 
             {gameStatus === 'gameover' && (
               <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="bg-white p-8 rounded-2xl text-center">
-                  <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-                  <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
+                  <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
+                  <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level - 1}</p>
                   <button 
                     onClick={handleRestart}
                     className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"

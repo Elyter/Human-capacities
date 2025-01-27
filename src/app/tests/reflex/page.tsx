@@ -26,7 +26,7 @@ ChartJS.register(
 
 export default function ReflexTest() {
   const [results, setResults] = useState<number[]>([]);
-  const [backgroundColor, setBackgroundColor] = useState<string>('white');
+  const [backgroundColor, setBackgroundColor] = useState<string>('transparent');
   const [, setStartTime] = useState<number | null>(null);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
@@ -45,7 +45,7 @@ export default function ReflexTest() {
       cancelAnimationFrame(animationFrameRef.current);
     }
     setCurrentTime(0);
-    setBackgroundColor('white');
+    setBackgroundColor('transparent'); // Au lieu de 'white'
     setStartTime(null);
     setReactionTime(null);
     setIsWaiting(false);
@@ -103,7 +103,7 @@ export default function ReflexTest() {
       }
       const finalTime = currentTime;
       setReactionTime(finalTime);
-      setBackgroundColor('white');
+      setBackgroundColor('transparent'); // Au lieu de 'white'
       setIsWaiting(false);
 
       // Sauvegarder le résultat et mettre à jour le graphique
@@ -202,7 +202,7 @@ export default function ReflexTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -220,15 +220,19 @@ export default function ReflexTest() {
         </svg>
       </Link>
       <div
-        className="flex flex-col items-center justify-center min-h-screen cursor-pointer"
-        style={{ backgroundColor }}
+        className={`flex flex-col items-center justify-center min-h-screen cursor-pointer bg-white dark:bg-gray-900 ${
+          backgroundColor !== 'transparent' ? 'override-background' : ''
+        }`}
+        style={{ 
+          backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined 
+        }}
         onMouseDown={handleClick}
       >
         {showStart ? (
           <div className="min-h-screen flex flex-col items-center justify-center">
-            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4">Test de Réflexes</h1>
-              <p className="mb-8">
+            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Réflexes</h1>
+              <p className="mb-8 dark:text-gray-200">
                 Mesurez votre temps de réaction.
                 Attendez que l&apos;écran devienne vert, puis cliquez le plus rapidement possible.
                 Attention à ne pas cliquer trop tôt !
@@ -242,7 +246,7 @@ export default function ReflexTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="absolute top-full -mt-52 w-[600px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <div className="absolute top-full -mt-52 w-[600px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                 <Line data={prepareChartData()} options={chartOptions} />
               </div>
             )}
@@ -268,9 +272,9 @@ export default function ReflexTest() {
               </div>
             )}
             {reactionTime && reactionTime > 0 && (
-              <div className="bg-white p-4 rounded-lg">
-                <p className="text-xl">Votre temps de réaction : {reactionTime} ms</p>
-                <p className="mt-2">Cliquez n&apos;importe où pour réessayer</p>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                <p className="text-xl dark:text-white">Votre temps de réaction : {reactionTime} ms</p>
+                <p className="mt-2 dark:text-gray-200">Cliquez n&apos;importe où pour réessayer</p>
               </div>
             )}
           </div>

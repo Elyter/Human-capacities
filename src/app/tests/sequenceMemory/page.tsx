@@ -221,7 +221,7 @@ export default function SequenceMemoryTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -234,13 +234,13 @@ export default function SequenceMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 p-4">
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
         <div className="max-w-screen-xl mx-auto mt-20">
           {gameStatus === 'waiting' ? (
             <div className="flex flex-col items-center justify-center space-y-8 max-w-2xl mx-auto">
-              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire de Séquence</h1>
-                <p className="mb-8 text-center">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h1 className="text-3xl font-bold mb-4 text-center dark:text-white">Test de Mémoire de Séquence</h1>
+                <p className="mb-8 text-center dark:text-gray-200">
                   Mémorisez la séquence qui s&apos;affiche et reproduisez-la dans le même ordre.
                   À chaque niveau, la séquence s&apos;allonge d&apos;un clic.
                   Vous avez trois vies.
@@ -255,18 +255,42 @@ export default function SequenceMemoryTest() {
                 </div>
               </div>
               
-              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h2 className="text-2xl font-bold mb-4 text-center">Statistiques</h2>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h2 className="text-2xl font-bold mb-4 text-center dark:text-white">Statistiques</h2>
                 <div className="h-[400px]">
-                  <Line data={prepareChartData(results)} options={chartOptions} />
+                  <Line data={prepareChartData(results)} options={{
+                    ...chartOptions,
+                    plugins: {
+                      ...chartOptions.plugins,
+                      legend: {
+                        ...chartOptions.plugins.legend,
+                        labels: {
+                          color: 'rgb(156, 163, 175)'
+                        }
+                      }
+                    },
+                    scales: {
+                      ...chartOptions.scales,
+                      x: {
+                        ...chartOptions.scales.x,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      },
+                      y: {
+                        ...chartOptions.scales.y,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      }
+                    }
+                  }} />
                 </div>
               </div>
             </div>
           ) : (
             <>
-              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
                 <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                  <div className="text-2xl">Niveau {level}</div>
+                  <div className="text-2xl dark:text-white">Niveau {level}</div>
                   <div className="flex gap-1">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <span key={i} className="text-2xl">
@@ -289,7 +313,7 @@ export default function SequenceMemoryTest() {
                         ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
                         ${correctTiles.includes(index) ? 'bg-green-500' : ''}
                         ${errorTile === index ? 'bg-red-500' : ''}
-                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index ? 'bg-gray-200 hover:bg-gray-300' : ''}
+                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index ? 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600' : ''}
                         disabled:cursor-not-allowed
                       `}
                     />
@@ -303,9 +327,9 @@ export default function SequenceMemoryTest() {
 
       {gameStatus === 'gameover' && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl text-center">
-            <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-            <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
+            <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
+            <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level - 1}</p>
             <div className="flex gap-4 justify-center">
               <button 
                 onClick={() => {

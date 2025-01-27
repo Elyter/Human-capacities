@@ -155,6 +155,11 @@ export default function VisualMemoryTest() {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true
+      }
+    },
     scales: {
       y: {
         beginAtZero: true,
@@ -176,11 +181,37 @@ export default function VisualMemoryTest() {
     fetchResults()
   }, [])
 
+  // Modifiez la fonction calculateGridSize
+  const calculateGridSize = () => {
+    // Calculer la taille maximale disponible pour la grille
+    const maxSize = Math.min(
+      window.innerWidth * 0.8,  // 80% de la largeur de l'écran
+      (window.innerHeight - 250) * 0.9  // 90% de la hauteur moins l'espace pour l'interface
+    );
+    // S'assurer que la taille est un multiple du nombre de cases pour une division égale
+    return Math.floor(Math.min(maxSize, 500) / gridSize) * gridSize;
+  };
+
+  // Ajoutez un state pour la taille des tuiles individuelles
+  const [tileSize, setTileSize] = useState(() => calculateGridSize());
+
+  // Gardez uniquement cet effet qui gère à la fois le redimensionnement et les changements de niveau
+  useEffect(() => {
+    const handleResize = () => {
+      const newSize = calculateGridSize();
+      setTileSize(newSize);
+    };
+
+    handleResize(); // Calcul initial
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [gridSize]); // gridSize comme dépendance
+
   return (
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -198,13 +229,13 @@ export default function VisualMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 p-4">
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-4 overflow-hidden">
         <div className="max-w-screen-xl mx-auto mt-20">
           {!isStarted ? (
             <div className="flex flex-col items-center justify-center space-y-8 max-w-2xl mx-auto">
-              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h1 className="text-3xl font-bold mb-4 text-center">Test de Mémoire Visuelle</h1>
-                <p className="mb-8 text-center">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h1 className="text-3xl font-bold mb-4 text-center dark:text-white">Test de Mémoire Visuelle</h1>
+                <p className="mb-8 text-center dark:text-gray-200">
                   Testez votre mémoire visuelle.
                   Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
                   Reproduisez la séquence pour passer au niveau suivant.
@@ -220,18 +251,42 @@ export default function VisualMemoryTest() {
                 </div>
               </div>
               
-              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h2 className="text-2xl font-bold mb-4 text-center">Statistiques</h2>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
+                <h2 className="text-2xl font-bold mb-4 text-center dark:text-white">Statistiques</h2>
                 <div className="h-[400px]">
-                  <Line data={prepareChartData()} options={chartOptions} />
+                  <Line data={prepareChartData()} options={{
+                    ...chartOptions,
+                    plugins: {
+                      ...chartOptions.plugins,
+                      legend: {
+                        ...chartOptions.plugins.legend,
+                        labels: {
+                          color: 'rgb(156, 163, 175)'
+                        }
+                      }
+                    },
+                    scales: {
+                      ...chartOptions.scales,
+                      x: {
+                        ...chartOptions.scales.x,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      },
+                      y: {
+                        ...chartOptions.scales.y,
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                      }
+                    }
+                  }} />
                 </div>
               </div>
             </div>
           ) : (
             <>
-              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
                 <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                  <div className="text-2xl">Niveau {level}</div>
+                  <div className="text-2xl dark:text-white">Niveau {level}</div>
                   <div className="flex gap-1">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <span key={i} className="text-2xl">
@@ -239,7 +294,7 @@ export default function VisualMemoryTest() {
                       </span>
                     ))}
                   </div>
-                  <div className="text-2xl">Score: {score}</div>
+                  <div className="text-2xl dark:text-white">Score: {score}</div>
                 </div>
                 {isShowingSequence && (
                   <div className="absolute bottom-0 left-0 right-0 h-1">
@@ -248,25 +303,34 @@ export default function VisualMemoryTest() {
                 )}
               </div>
 
-              <div className="grid gap-2 w-[min(90vw,500px)] aspect-square mx-auto mt-32" 
+              <div 
+                className="grid mx-auto mt-32" 
                 style={{ 
+                  display: 'grid',
                   gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                  pointerEvents: isShowingSequence || isProcessingError ? 'none' : 'auto'
+                  gap: '0.5rem',
+                  width: `${tileSize}px`,
+                  height: `${tileSize}px`,
+                  pointerEvents: isShowingSequence || isProcessingError ? 'none' : 'auto',
                 }}
               >
                 {Array.from({ length: gridSize * gridSize }).map((_, index) => (
                   <div
                     key={index}
                     onClick={() => handleTileClick(index)}
+                    style={{
+                      width: `${tileSize / gridSize - 8}px`, // Soustrait l'espace du gap
+                      height: `${tileSize / gridSize - 8}px`
+                    }}
                     className={`
-                      aspect-square rounded-xl transition-colors cursor-pointer backdrop-blur-sm shadow-lg
+                      rounded-xl transition-colors cursor-pointer backdrop-blur-sm shadow-lg
                       ${isShowingSequence && sequence.includes(index) 
                         ? 'bg-blue-500' 
                         : correctTiles.includes(index)
                           ? 'bg-green-500'
                           : errorTiles.includes(index)
                             ? 'bg-red-500'
-                            : 'bg-white/80 hover:bg-gray-100'
+                            : 'bg-white/80 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }
                     `}
                   />
@@ -275,9 +339,9 @@ export default function VisualMemoryTest() {
 
               {gameOver && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                  <div className="bg-white p-8 rounded-2xl text-center">
-                    <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-                    <p className="text-xl mb-6">Niveau atteint : {level}</p>
+                  <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
+                    <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
+                    <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level}</p>
                     <button 
                       onClick={() => {
                         setIsStarted(false);

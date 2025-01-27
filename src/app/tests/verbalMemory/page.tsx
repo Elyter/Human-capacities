@@ -182,7 +182,7 @@ export default function VerbalMemoryTest() {
     <>
       <Link 
         href="/"
-        className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+        className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -195,12 +195,12 @@ export default function VerbalMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
           <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
-            <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4">Test de Mémoire Verbale</h1>
-              <p className="mb-8">
+            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire Verbale</h1>
+              <p className="mb-8 dark:text-gray-200">
                 Mémorisez les mots et indiquez si vous les avez déjà vus ou non.
                 Vous avez trois vies.
                 Voyons combien de mots vous pouvez mémoriser ! 
@@ -214,16 +214,40 @@ export default function VerbalMemoryTest() {
             </div>
 
             {results.length > 0 && (
-              <div className="w-[600px] h-[400px] bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <Line data={prepareChartData()} options={chartOptions} />
+              <div className="w-[600px] h-[400px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                <Line data={prepareChartData()} options={{
+                  ...chartOptions,
+                  plugins: {
+                    ...chartOptions.plugins,
+                    legend: {
+                      ...chartOptions.plugins.legend,
+                      labels: {
+                        color: 'rgb(156, 163, 175)'
+                      }
+                    }
+                  },
+                  scales: {
+                    ...chartOptions.scales,
+                    x: {
+                      ...chartOptions.scales.x,
+                      ticks: { color: 'rgb(156, 163, 175)' },
+                      grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                    },
+                    y: {
+                      ...chartOptions.scales.y,
+                      ticks: { color: 'rgb(156, 163, 175)' },
+                      grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                    }
+                  }
+                }} />
               </div>
             )}
           </div>
         ) : (
           <>
-            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
               <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                <div className="text-2xl">Score: {score}</div>
+                <div className="text-2xl dark:text-white">Score: {score}</div>
                 <div className="flex gap-1">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <span key={i} className="text-2xl">
@@ -235,7 +259,7 @@ export default function VerbalMemoryTest() {
             </div>
 
             <div className="flex flex-col items-center justify-center gap-8 pt-24">
-              <div className="text-4xl font-bold mb-8">{motCourant}</div>
+              <div className="text-4xl font-bold mb-8 dark:text-white">{motCourant}</div>
               
               <div className="flex gap-6">
                 <button 
@@ -257,9 +281,9 @@ export default function VerbalMemoryTest() {
 
         {gameStatus === 'gameover' && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-2xl text-center">
-              <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-              <p className="text-xl mb-6">Score final : {score}</p>
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
+              <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
+              <p className="text-xl mb-6 dark:text-gray-200">Score final : {score}</p>
               <button 
                 onClick={() => setGameStatus('waiting')}
                 className="px-6 py-3 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl"

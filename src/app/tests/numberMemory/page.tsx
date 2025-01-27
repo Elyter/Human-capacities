@@ -171,7 +171,7 @@ export default function NumberMemoryTest() {
         <>
             <Link 
                 href="/"
-                className="fixed top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-50"
+                className="fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 dark:text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-50"
             >
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -189,11 +189,11 @@ export default function NumberMemoryTest() {
                 </svg>
             </Link>
 
-            <div className="h-full min-h-[100vh] bg-gray-100 flex items-center justify-center">
+            <div className="h-full min-h-[100vh] bg-white dark:bg-gray-900 flex items-center justify-center">
                 {gameStatus !== 'waiting' && (
-                    <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-sm shadow-lg z-40">
+                    <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
                         <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                            <div className="text-2xl font-medium">Niveau {level}</div>
+                            <div className="text-2xl font-medium dark:text-white">Niveau {level}</div>
                             <div className="flex gap-1">
                                 {Array.from({ length: lives }).map((_, i) => (
                                     <span key={i} className="text-2xl">❤️</span>
@@ -211,9 +211,9 @@ export default function NumberMemoryTest() {
 
                 {gameStatus === 'waiting' ? (
                     <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
-                        <div className="text-center max-w-md bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                            <h1 className="text-3xl font-bold mb-4">Test de Mémoire des Chiffres</h1>
-                            <p className="mb-8">
+                        <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                            <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire des Chiffres</h1>
+                            <p className="mb-8 dark:text-gray-200">
                                 Mémorisez les chiffres qui apparaissent à l&apos;écran.
                                 À chaque niveau réussi, vous devrez mémoriser un chiffre supplémentaire.
                                 Voyons jusqu&apos;où vous pouvez aller !
@@ -227,9 +227,33 @@ export default function NumberMemoryTest() {
                         </div>
 
                         {results.length > 0 && (
-                            <div className="w-full max-w-2xl mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
+                            <div className="w-full max-w-2xl mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
                                 <div className="h-[400px]">
-                                    <Line data={prepareChartData()} options={chartOptions} />
+                                    <Line data={prepareChartData()} options={{
+                                        ...chartOptions,
+                                        plugins: {
+                                            ...chartOptions.plugins,
+                                            legend: {
+                                                ...chartOptions.plugins.legend,
+                                                labels: {
+                                                    color: 'rgb(156, 163, 175)'
+                                                }
+                                            }
+                                        },
+                                        scales: {
+                                            ...chartOptions.scales,
+                                            x: {
+                                                ...chartOptions.scales.x,
+                                                ticks: { color: 'rgb(156, 163, 175)' },
+                                                grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                                            },
+                                            y: {
+                                                ...chartOptions.scales.y,
+                                                ticks: { color: 'rgb(156, 163, 175)' },
+                                                grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                                            }
+                                        }
+                                    }} />
                                 </div>
                             </div>
                         )}
@@ -237,7 +261,7 @@ export default function NumberMemoryTest() {
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full min-h-[100vh] gap-4 pt-20">
                         {isShowingNumbers ? (
-                            <div className="text-8xl font-bold select-none pointer-events-none">{numbers}</div>
+                            <div className="text-8xl font-bold select-none pointer-events-none dark:text-white">{numbers}</div>
                         ) : (
                             <div className="flex flex-col items-center gap-4">
                                 <input
@@ -246,7 +270,7 @@ export default function NumberMemoryTest() {
                                     value={userInput}
                                     onChange={(e) => setUserInput(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    className="text-4xl text-center w-64 p-4 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
+                                    className="text-4xl text-center w-64 p-4 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-600"
                                     autoFocus
                                 />
                                 <button 
@@ -262,9 +286,9 @@ export default function NumberMemoryTest() {
 
                 {gameStatus === 'gameover' && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-white p-8 rounded-2xl text-center">
-                            <h2 className="text-2xl font-bold mb-4">Partie terminée !</h2>
-                            <p className="text-xl mb-6">Niveau atteint : {level - 1}</p>
+                        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
+                            <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
+                            <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level - 1}</p>
                             <button 
                                 onClick={startGame}
                                 className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
