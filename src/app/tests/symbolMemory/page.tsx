@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import StartModal from '@/components/StartModal';
 
 ChartJS.register(
   CategoryScale,
@@ -237,54 +238,17 @@ export default function SymbolMemoryTest() {
 
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="min-h-screen flex flex-col items-center justify-center">
-            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire des Symboles</h1>
-              <p className="mb-8 dark:text-gray-200">
+          <StartModal 
+            title="Test de Mémoire des Symboles"
+            description={
+              <p>
                 Mémorisez la position des paires de symboles.
                 Retrouvez toutes les paires pour passer au niveau suivant.
                 Attention, vous n&apos;avez que trois vies !
               </p>
-              <button 
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                onClick={startGame}
-              >
-                Commencer
-              </button>
-            </div>
-
-            {results.length > 0 && (
-              <div className="w-full max-w-2xl mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <div className="h-[400px]">
-                  <Line data={prepareChartData(results)} options={{
-                    ...chartOptions,
-                    plugins: {
-                      ...chartOptions.plugins,
-                      legend: {
-                        ...chartOptions.plugins.legend,
-                        labels: {
-                          color: 'rgb(156, 163, 175)'
-                        }
-                      }
-                    },
-                    scales: {
-                      ...chartOptions.scales,
-                      x: {
-                        ...chartOptions.scales.x,
-                        ticks: { color: 'rgb(156, 163, 175)' },
-                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                      },
-                      y: {
-                        ...chartOptions.scales.y,
-                        ticks: { color: 'rgb(156, 163, 175)' },
-                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                      }
-                    }
-                  }} />
-                </div>
-              </div>
-            )}
-          </div>
+            }
+            onStart={startGame}
+          />
         ) : (
           <>
             <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">

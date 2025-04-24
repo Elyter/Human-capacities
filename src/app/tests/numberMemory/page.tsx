@@ -12,6 +12,7 @@ import {
     Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import StartModal from '@/components/StartModal';
 
 ChartJS.register(
     CategoryScale,
@@ -210,54 +211,17 @@ export default function NumberMemoryTest() {
                 )}
 
                 {gameStatus === 'waiting' ? (
-                    <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
-                        <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                            <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire des Chiffres</h1>
-                            <p className="mb-8 dark:text-gray-200">
+                    <StartModal 
+                        title="Test de Mémoire des Chiffres"
+                        description={
+                            <p>
                                 Mémorisez les chiffres qui apparaissent à l&apos;écran.
                                 À chaque niveau réussi, vous devrez mémoriser un chiffre supplémentaire.
                                 Voyons jusqu&apos;où vous pouvez aller !
                             </p>
-                            <button 
-                                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                                onClick={startGame}
-                            >
-                                Commencer
-                            </button>
-                        </div>
-
-                        {results.length > 0 && (
-                            <div className="w-full max-w-2xl mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                                <div className="h-[400px]">
-                                    <Line data={prepareChartData()} options={{
-                                        ...chartOptions,
-                                        plugins: {
-                                            ...chartOptions.plugins,
-                                            legend: {
-                                                ...chartOptions.plugins.legend,
-                                                labels: {
-                                                    color: 'rgb(156, 163, 175)'
-                                                }
-                                            }
-                                        },
-                                        scales: {
-                                            ...chartOptions.scales,
-                                            x: {
-                                                ...chartOptions.scales.x,
-                                                ticks: { color: 'rgb(156, 163, 175)' },
-                                                grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                                            },
-                                            y: {
-                                                ...chartOptions.scales.y,
-                                                ticks: { color: 'rgb(156, 163, 175)' },
-                                                grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                                            }
-                                        }
-                                    }} />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                        }
+                        onStart={startGame}
+                    />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full min-h-[100vh] gap-4 pt-20">
                         {isShowingNumbers ? (

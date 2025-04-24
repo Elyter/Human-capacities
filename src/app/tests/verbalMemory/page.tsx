@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import StartModal from '@/components/StartModal';
 
 ChartJS.register(
   CategoryScale,
@@ -197,52 +198,18 @@ export default function VerbalMemoryTest() {
 
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         {gameStatus === 'waiting' ? (
-          <div className="h-full min-h-[100vh] flex flex-col items-center justify-center gap-8">
-            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Mémoire Verbale</h1>
-              <p className="mb-8 dark:text-gray-200">
-                Mémorisez les mots et indiquez si vous les avez déjà vus ou non.
+          <StartModal 
+            title="Test de Mémoire Verbale"
+            description={
+              <p>
+                Des mots vont apparaître un par un.
+                Si vous avez déjà vu le mot, cliquez sur "VU".
+                Si c&apos;est la première fois que vous voyez le mot, cliquez sur "NOUVEAU".
                 Vous avez trois vies.
-                Voyons combien de mots vous pouvez mémoriser ! 
               </p>
-              <button 
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                onClick={startGame}
-              >
-                Commencer
-              </button>
-            </div>
-
-            {results.length > 0 && (
-              <div className="w-[600px] h-[400px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <Line data={prepareChartData()} options={{
-                  ...chartOptions,
-                  plugins: {
-                    ...chartOptions.plugins,
-                    legend: {
-                      ...chartOptions.plugins.legend,
-                      labels: {
-                        color: 'rgb(156, 163, 175)'
-                      }
-                    }
-                  },
-                  scales: {
-                    ...chartOptions.scales,
-                    x: {
-                      ...chartOptions.scales.x,
-                      ticks: { color: 'rgb(156, 163, 175)' },
-                      grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                    },
-                    y: {
-                      ...chartOptions.scales.y,
-                      ticks: { color: 'rgb(156, 163, 175)' },
-                      grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                    }
-                  }
-                }} />
-              </div>
-            )}
-          </div>
+            }
+            onStart={startGame}
+          />
         ) : (
           <>
             <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">

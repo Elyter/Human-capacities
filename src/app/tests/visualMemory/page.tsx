@@ -12,6 +12,7 @@ import {
   Legend
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import StartModal from '@/components/StartModal'
 
 ChartJS.register(
   CategoryScale,
@@ -226,59 +227,23 @@ export default function VisualMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-4 overflow-hidden">
-        <div className="max-w-screen-xl mx-auto mt-20">
+      <div className="h-full min-h-[100vh] bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="max-w-screen-xl mx-auto">
           {!isStarted ? (
-            <div className="flex flex-col items-center justify-center space-y-8 max-w-2xl mx-auto">
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h1 className="text-3xl font-bold mb-4 text-center dark:text-white">Test de Mémoire Visuelle</h1>
-                <p className="mb-8 text-center dark:text-gray-200">
-                  Testez votre mémoire visuelle.
-                  Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
-                  Reproduisez la séquence pour passer au niveau suivant.
-                  Vous avez droit à trois erreurs par niveau.
-                </p>
-                <div className="flex justify-center">
-                  <button 
-                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                    onClick={startGame}
-                  >
-                    Commencer
-                  </button>
-                </div>
-              </div>
-              
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full">
-                <h2 className="text-2xl font-bold mb-4 text-center dark:text-white">Statistiques</h2>
-                <div className="h-[400px]">
-                  <Line data={prepareChartData()} options={{
-                    ...chartOptions,
-                    plugins: {
-                      ...chartOptions.plugins,
-                      legend: {
-                        ...chartOptions.plugins.legend,
-                        labels: {
-                          color: 'rgb(156, 163, 175)'
-                        }
-                      }
-                    },
-                    scales: {
-                      ...chartOptions.scales,
-                      x: {
-                        ...chartOptions.scales.x,
-                        ticks: { color: 'rgb(156, 163, 175)' },
-                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                      },
-                      y: {
-                        ...chartOptions.scales.y,
-                        ticks: { color: 'rgb(156, 163, 175)' },
-                        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                      }
-                    }
-                  }} />
-                </div>
-              </div>
-            </div>
+            <StartModal 
+              title="Test de Mémoire Visuelle"
+              description={
+                <>
+                  <p>
+                    Testez votre mémoire visuelle.
+                    Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
+                    Reproduisez la séquence pour passer au niveau suivant.
+                    Vous avez droit à trois erreurs par niveau.
+                  </p>
+                </>
+              }
+              onStart={startGame}
+            />
           ) : (
             <>
               <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">

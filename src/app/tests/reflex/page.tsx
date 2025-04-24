@@ -13,6 +13,7 @@ import {
   Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import StartModal from '@/components/StartModal';
 
 ChartJS.register(
   CategoryScale,
@@ -228,24 +229,21 @@ export default function ReflexTest() {
         style={{ 
           backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
         }}
-        onMouseDown={handleClick}
+        onClick={handleClick}
       >
         {showStart ? (
           <div className="w-full flex flex-col items-center py-12 gap-8">
-            <div className="text-center max-w-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-              <h1 className="text-3xl font-bold mb-4 dark:text-white">Test de Réflexes</h1>
-              <p className="mb-8 dark:text-gray-200">
-                Mesurez votre temps de réaction.
-                Attendez que l&apos;écran devienne vert, puis cliquez le plus rapidement possible.
-                Attention à ne pas cliquer trop tôt !
-              </p>
-              <button
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                onClick={startTest}
-              >
-                Commencer
-              </button>
-            </div>
+            <StartModal 
+              title="Test de Réflexes"
+              description={
+                <p>
+                  Mesurez votre temps de réaction.
+                  Attendez que l&apos;écran devienne vert, puis cliquez le plus rapidement possible.
+                  Attention à ne pas cliquer trop tôt !
+                </p>
+              }
+              onStart={startTest}
+            />
 
             {results.length > 0 && (
               <div className="w-[600px] max-w-[90vw] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
