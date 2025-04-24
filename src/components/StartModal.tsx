@@ -1,20 +1,29 @@
 'use client';
 
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 import ModalStats from './ModalStats';
 
 interface StartModalProps {
   title: string;
-  description: ReactNode;
+  description: ReactNode; 
   onStart: () => void;
   stats?: ReactNode;
 }
 
 export default function StartModal({ title, description, onStart, stats }: StartModalProps) {
   const statsRef = useRef<HTMLDivElement>(null);
+  const [showStats, setShowStats] = useState(false);
 
   const scrollToStats = () => {
-    statsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setShowStats(true);
+    // Petit délai pour s'assurer que le composant est rendu avant de défiler
+    setTimeout(() => {
+      if (statsRef.current) {
+        const yOffset = -50; // Ajustement pour que le modal soit bien visible
+        const y = statsRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
@@ -48,11 +57,13 @@ export default function StartModal({ title, description, onStart, stats }: Start
         <div 
           ref={statsRef} 
           id="stats-section"
-          className="w-full py-20 mt-[100vh]"
+          className="w-full py-10 mt-20"
         >
-          <ModalStats>
-            {stats}
-          </ModalStats>
+          {showStats && (
+            <ModalStats>
+              {stats}
+            </ModalStats>
+          )}
         </div>
       )}
     </div>
