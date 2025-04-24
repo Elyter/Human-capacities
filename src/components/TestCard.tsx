@@ -15,6 +15,12 @@ interface TestCardProps {
 export default function TestCard({ title, description, image, link, rules }: TestCardProps) {
   const [isInfoHovering, setIsInfoHovering] = useState(false);
 
+  // Fonction pour arrêter la propagation du clic
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <Link
       href={link}
@@ -26,6 +32,7 @@ export default function TestCard({ title, description, image, link, rules }: Tes
           className="absolute top-3 right-3 w-7 h-7 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 border border-gray-100 dark:border-gray-700 hover:scale-105 transition-all duration-200 cursor-pointer shadow-sm"
           onMouseEnter={() => setIsInfoHovering(true)}
           onMouseLeave={() => setIsInfoHovering(false)}
+          onClick={handleInfoClick}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -57,6 +64,7 @@ export default function TestCard({ title, description, image, link, rules }: Tes
           className={`absolute inset-0 backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 p-6 flex flex-col justify-center transition-all duration-300 ease-in-out ${
             isInfoHovering ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
           }`}
+          onClick={handleInfoClick}
         >
           <h3 className="text-gray-800 dark:text-gray-100 font-medium text-lg mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">Comment jouer</h3>
           <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{rules}</p>
