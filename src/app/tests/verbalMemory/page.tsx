@@ -14,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import StartModal from '@/components/StartModal';
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
   CategoryScale,
@@ -229,9 +230,10 @@ export default function VerbalMemoryTest() {
                 </div>
               </div>
               {motCourant && (
-                <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200">
-                  <div className="progress-bar"></div>
-                </div>
+                <ProgressBar 
+                  duration={3000} 
+                  isActive={gameStatus === 'playing'} 
+               />
               )}
             </div>
 

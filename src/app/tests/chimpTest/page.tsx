@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import StartModal from '@/components/StartModal';
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
   CategoryScale,
@@ -358,6 +359,13 @@ export default function ChimpTest() {
                 })}
               </div>
             </div>
+
+            {gameStatus === 'showing' && (
+              <ProgressBar 
+                duration={3000} 
+                isActive={gameStatus === 'showing'} 
+              />
+            )}
           </>
         )}
 

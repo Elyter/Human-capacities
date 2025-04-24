@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import StartModal from '@/components/StartModal';
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
   CategoryScale,
@@ -37,6 +38,8 @@ export default function SequenceMemoryTest() {
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
   const [isProcessingError, setIsProcessingError] = useState(false);
+
+  const sequenceShowTime = 1000 * (sequence.length + 1); // Durée basée sur la longueur de la séquence
 
   const generateSequence = (currentLevel: number) => {
     if (currentLevel === 1) {
@@ -287,6 +290,15 @@ export default function SequenceMemoryTest() {
                 ))}
               </div>
             </div>
+
+            {isShowingSequence && (
+              <div className="fixed top-20 left-0 right-0 z-40">
+                <ProgressBar 
+                  duration={sequenceShowTime} 
+                  isActive={isShowingSequence} 
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

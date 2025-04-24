@@ -13,6 +13,7 @@ import {
 import { Line } from 'react-chartjs-2'
 import Link from 'next/link'
 import StartModal from '@/components/StartModal'
+import ProgressBar from "@/components/ProgressBar"
 
 ChartJS.register(
   CategoryScale,
@@ -71,17 +72,18 @@ export default function TypingSpeed() {
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null);
   const [results, setResults] = useState<Result[]>([])
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
-  // Séparer les effets pour le timer et la fin du jeu
+  // Modifier l'effet pour le timer
   useEffect(() => {
-    if (isStarted && timeLeft > 0) {
+    if (isStarted && timeLeft > 0 && hasStartedTyping) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
 
       return () => clearInterval(timer)
     }
-  }, [isStarted, timeLeft])
+  }, [isStarted, timeLeft, hasStartedTyping])
 
   // Nouvel effet pour gérer la fin du jeu
   useEffect(() => {
@@ -187,6 +189,12 @@ export default function TypingSpeed() {
       setCurrentInput('')
     } else {
       setCurrentInput(value)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!hasStartedTyping) {
+      setHasStartedTyping(true);
     }
   }
 
@@ -327,15 +335,26 @@ export default function TypingSpeed() {
                       type="text"
                       value={currentInput}
                       onChange={handleInput}
+                      onKeyDown={handleKeyDown}
                       className="w-full p-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white"
                       placeholder="Tapez les mots ici..."
                       disabled={!isStarted}
                     />
                   </div>
                 </div>
+
+                <div className="fixed top-20 left-0 right-0 z-40">
+                  <ProgressBar 
+                    duration={60000} 
+                    isActive={isStarted && !isFinished && hasStartedTyping} 
+                    onComplete={() => {
+                      if (!isFinished) setIsFinished(true);
+                    }}
+                  />
+                </div>
               </>
             )}
-
+ 
             {isFinished && (
               <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">

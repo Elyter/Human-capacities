@@ -13,6 +13,7 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import StartModal from '@/components/StartModal'
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
   CategoryScale,
@@ -262,12 +263,10 @@ export default function VisualMemoryTest() {
                   <div className="text-2xl dark:text-white">Score: {score}</div>
                 </div>
                 {isShowingSequence && (
-                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200">
-                    <div 
-                      className="progress-bar"
-                      style={{ animationDuration: `${SEQUENCE_SHOW_TIME}ms` }}
-                    />
-                  </div>
+                  <ProgressBar 
+                    duration={SEQUENCE_SHOW_TIME} 
+                    isActive={isShowingSequence} 
+                  />
                 )}
               </div>
 

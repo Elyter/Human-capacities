@@ -14,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import StartModal from '@/components/StartModal';
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
   CategoryScale,
@@ -27,6 +28,8 @@ ChartJS.register(
 
 // Symboles possibles pour les cartes (emojis)
 const SYMBOLS = ['🌟', '🎈', '🎨', '🎭', '🎪', '🎯', '🎲', '🎳', '🎮', '🎸', '🎺', '🎨', '🎭', '🎪'];
+
+const showDuration = 5000; // 5 secondes pour mémoriser les symboles
 
 const prepareChartData = (results: Array<{ score: number }>) => {
   const scores = results.map(r => r.score);
@@ -179,7 +182,7 @@ export default function SymbolMemoryTest() {
     setTimeout(() => {
       setCards(cards => cards.map(card => ({ ...card, isFlipped: false })));
       setGameStatus('playing');
-    }, 5000);
+    }, showDuration);
   };
 
   const fetchResults = async () => {
@@ -269,8 +272,11 @@ export default function SymbolMemoryTest() {
 
             <div className="mt-24 grid grid-cols-3 gap-4 p-4">
               {gameStatus === 'showing' && (
-                <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200">
-                  <div className="progress-bar"></div>
+                <div className="fixed top-20 left-0 right-0 z-40">
+                  <ProgressBar 
+                    duration={showDuration} 
+                    isActive={gameStatus === 'showing'} 
+                  />
                 </div>
               )}
               {cards.map((card) => (

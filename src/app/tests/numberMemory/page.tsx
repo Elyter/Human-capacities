@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import StartModal from '@/components/StartModal';
+import ProgressBar from "@/components/ProgressBar";
 
 ChartJS.register(
     CategoryScale,
@@ -205,8 +206,11 @@ export default function NumberMemoryTest() {
                 )}
 
                 {isShowingNumbers && (
-                    <div className="fixed top-20 left-0 right-0 h-2 bg-gray-200">
-                        <div className="progress-bar"></div>
+                    <div className="fixed top-20 left-0 right-0 z-40">
+                        <ProgressBar 
+                            duration={5000} 
+                            isActive={isShowingNumbers} 
+                        />
                     </div>
                 )}
 
