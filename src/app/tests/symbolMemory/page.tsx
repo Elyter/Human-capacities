@@ -248,6 +248,11 @@ export default function SymbolMemoryTest() {
               </p>
             }
             onStart={startGame}
+            stats={results.length > 0 ? (
+              <Line data={prepareChartData(results)} options={chartOptions} />
+            ) : (
+              <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
+            )}
           />
         ) : (
           <>

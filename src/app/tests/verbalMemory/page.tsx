@@ -204,11 +204,16 @@ export default function VerbalMemoryTest() {
               <p>
                 Des mots vont apparaître un par un.
                 Si vous avez déjà vu le mot, cliquez sur "VU".
-                Si c&apos;est la première fois que vous voyez le mot, cliquez sur "NOUVEAU".
+                Si c'est la première fois que vous voyez le mot, cliquez sur "NOUVEAU".
                 Vous avez trois vies.
               </p>
             }
             onStart={startGame}
+            stats={results.length > 0 ? (
+              <Line data={prepareChartData()} options={chartOptions} />
+            ) : (
+              <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
+            )}
           />
         ) : (
           <>

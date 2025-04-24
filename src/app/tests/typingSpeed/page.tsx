@@ -271,12 +271,17 @@ export default function TypingSpeed() {
             title="Test de Vitesse de Frappe"
             description={
               <p>
-                Tapez les mots qui apparaissent à l&apos;écran aussi vite et précisément que possible.
+                Tapez les mots qui apparaissent à l'écran aussi vite et précisément que possible.
                 Vous avez 60 secondes pour taper le maximum de mots.
                 Votre score final sera le nombre de mots correctement tapés par minute.
               </p>
             }
             onStart={handleStart}
+            stats={results.length > 0 ? (
+              <Line data={prepareChartData()} options={chartOptions} />
+            ) : (
+              <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
+            )}
           />
         ) : (
           <div className="w-full">

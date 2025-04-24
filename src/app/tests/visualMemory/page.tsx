@@ -233,16 +233,19 @@ export default function VisualMemoryTest() {
             <StartModal 
               title="Test de Mémoire Visuelle"
               description={
-                <>
-                  <p>
-                    Testez votre mémoire visuelle.
-                    Des tuiles vont s&apos;illuminer brièvement à l&apos;écran.
-                    Reproduisez la séquence pour passer au niveau suivant.
-                    Vous avez droit à trois erreurs par niveau.
-                  </p>
-                </>
+                <p>
+                  Testez votre mémoire visuelle.
+                  Des tuiles vont s'illuminer brièvement à l'écran.
+                  Reproduisez la séquence pour passer au niveau suivant.
+                  Vous avez droit à trois erreurs par niveau.
+                </p>
               }
               onStart={startGame}
+              stats={results.length > 0 ? (
+                <Line data={prepareChartData()} options={chartOptions} />
+              ) : (
+                <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
+              )}
             />
           ) : (
             <>

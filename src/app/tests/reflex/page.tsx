@@ -220,37 +220,26 @@ export default function ReflexTest() {
           />
         </svg>
       </Link>
-      <div
-        className={`flex flex-col items-center ${
-          showStart ? 'justify-start' : 'justify-center'
-        } min-h-screen cursor-pointer transition-colors duration-200 ${
-          backgroundColor === 'transparent' ? 'bg-white dark:bg-gray-900' : ''
-        }`}
-        style={{ 
-          backgroundColor: backgroundColor !== 'transparent' ? backgroundColor : undefined,
-        }}
-        onClick={handleClick}
-      >
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center" 
+           style={{ backgroundColor }} 
+           onClick={handleClick}>
         {showStart ? (
-          <div className="w-full flex flex-col items-center py-12 gap-8">
-            <StartModal 
-              title="Test de Réflexes"
-              description={
-                <p>
-                  Mesurez votre temps de réaction.
-                  Attendez que l&apos;écran devienne vert, puis cliquez le plus rapidement possible.
-                  Attention à ne pas cliquer trop tôt !
-                </p>
-              }
-              onStart={startTest}
-            />
-
-            {results.length > 0 && (
-              <div className="w-[600px] max-w-[90vw] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg mx-4">
-                <Line data={prepareChartData()} options={chartOptions} />
-              </div>
+          <StartModal 
+            title="Test de Réflexes"
+            description={
+              <p>
+                Mesurez votre temps de réaction.
+                Attendez que l'écran devienne vert, puis cliquez le plus rapidement possible.
+                Attention à ne pas cliquer trop tôt !
+              </p>
+            }
+            onStart={startTest}
+            stats={results.length > 0 ? (
+              <Line data={prepareChartData()} options={chartOptions} />
+            ) : (
+              <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
             )}
-          </div>
+          />
         ) : (
           <div className="text-center flex flex-col items-center justify-center min-h-screen">
             {backgroundColor === 'green' && (

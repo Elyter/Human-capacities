@@ -235,57 +235,60 @@ export default function SequenceMemoryTest() {
         </svg>
       </Link>
 
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
-        <div className="max-w-screen-xl mx-auto mt-20">
-          {gameStatus === 'waiting' ? (
-            <StartModal 
-              title="Test de Mémoire de Séquence"
-              description={
-                <p>
-                  Mémorisez la séquence qui s&apos;affiche et reproduisez-la dans le même ordre.
-                  À chaque niveau, la séquence s&apos;allonge d&apos;un clic.
-                  Vous avez trois vies.
-                </p>
-              }
-              onStart={startGame}
-            />
-          ) : (
-            <>
-              <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
-                <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                  <div className="text-2xl dark:text-white">Niveau {level}</div>
-                  <div className="flex gap-1">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <span key={i} className="text-2xl">
-                        {i < (3 - lives) ? '🖤' : '❤️'}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-center items-center min-h-screen">
-                <div className="grid grid-cols-3 gap-4">
-                  {Array.from({ length: 9 }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleTileClick(index)}
-                      disabled={isShowingSequence || isProcessingError}
-                      className={`
-                        w-24 h-24 rounded-xl transition-all duration-200
-                        ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
-                        ${correctTiles.includes(index) ? 'bg-green-500' : ''}
-                        ${errorTile === index ? 'bg-red-500' : ''}
-                        ${!activeIndex && !correctTiles.includes(index) && errorTile !== index ? 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600' : ''}
-                        disabled:cursor-not-allowed
-                      `}
-                    />
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        {gameStatus === 'waiting' ? (
+          <StartModal 
+            title="Test de Mémoire de Séquence"
+            description={
+              <p>
+                Mémorisez la séquence qui s'affiche et reproduisez-la dans le même ordre.
+                À chaque niveau, la séquence s'allonge d'un clic.
+                Vous avez trois vies.
+              </p>
+            }
+            onStart={startGame}
+            stats={results.length > 0 ? (
+              <Line data={prepareChartData(results)} options={chartOptions} />
+            ) : (
+              <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
+            )}
+          />
+        ) : (
+          <div className="max-w-screen-xl mx-auto mt-20 w-full">
+            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
+              <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+                <div className="text-2xl dark:text-white">Niveau {level}</div>
+                <div className="flex gap-1">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <span key={i} className="text-2xl">
+                      {i < (3 - lives) ? '🖤' : '❤️'}
+                    </span>
                   ))}
                 </div>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="flex justify-center items-center min-h-screen">
+              <div className="grid grid-cols-3 gap-4">
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleTileClick(index)}
+                    disabled={isShowingSequence || isProcessingError}
+                    className={`
+                      w-24 h-24 rounded-xl transition-all duration-200
+                      ${isShowingSequence && activeIndex === index ? 'bg-blue-500' : ''}
+                      ${correctTiles.includes(index) ? 'bg-green-500' : ''}
+                      ${errorTile === index ? 'bg-red-500' : ''}
+                      ${!activeIndex && !correctTiles.includes(index) && errorTile !== index ? 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600' : ''}
+                      disabled:cursor-not-allowed
+                    `}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {gameStatus === 'gameover' && (
