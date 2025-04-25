@@ -290,15 +290,6 @@ export default function SequenceMemoryTest() {
                 ))}
               </div>
             </div>
-
-            {isShowingSequence && (
-              <div className="fixed top-20 left-0 right-0 z-40">
-                <ProgressBar 
-                  duration={sequenceShowTime} 
-                  isActive={isShowingSequence} 
-                />
-              </div>
-            )}
           </div>
         )}
       </div>

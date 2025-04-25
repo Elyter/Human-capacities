@@ -133,11 +133,16 @@ export default function NumberMemoryTest() {
         setIsShowingNumbers(true);
         setUserInput('');
 
+        // Calculer la durée en fonction du niveau
+        // Base de 3 secondes + 1 seconde par chiffre
+        const duration = 3000 + currentLevel * 1000;
+
+        // Attendre que la barre de progression soit terminée avant d'afficher l'input
         setTimeout(() => {
             setIsShowingNumbers(false);
-            // Focus sur l'input quand il apparaît
+            // Focus sur l'input quand il apparaît  
             setTimeout(() => inputRef.current?.focus(), 0);
-        }, 5000);
+        }, duration);
     };
 
     const startGame = () => {
@@ -208,7 +213,7 @@ export default function NumberMemoryTest() {
                 {isShowingNumbers && (
                     <div className="fixed top-20 left-0 right-0 z-40">
                         <ProgressBar 
-                            duration={5000} 
+                            duration={3000 + level * 1000} 
                             isActive={isShowingNumbers} 
                         />
                     </div>
