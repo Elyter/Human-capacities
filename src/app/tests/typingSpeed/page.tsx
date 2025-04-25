@@ -304,7 +304,6 @@ export default function TypingSpeed() {
                 </div>
 
                 <div className="flex flex-col items-center justify-center gap-8 pt-24 px-4">
-                  {/* Le reste du contenu du jeu */}
                   <div className="w-full max-w-3xl">
                     <div 
                       ref={containerRef}
@@ -369,8 +368,6 @@ export default function TypingSpeed() {
                     duration={60000} 
                     isActive={isStarted && !isFinished && hasStartedTyping} 
                     onComplete={() => {}}
-                    timeLeft={timeLeft}
-                    totalTime={60}
                   />
                 </div>
               </>
