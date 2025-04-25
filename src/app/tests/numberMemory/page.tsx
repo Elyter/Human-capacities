@@ -133,11 +133,9 @@ export default function NumberMemoryTest() {
         setIsShowingNumbers(true);
         setUserInput('');
 
-        // Calculer la durée en fonction du niveau
-        // Base de 3 secondes + 1 seconde par chiffre
-        const duration = 3000 + currentLevel * 1000;
 
-        // Attendre que la barre de progression soit terminée avant d'afficher l'input
+        const duration = 1000 + (currentLevel * 300 * Math.sqrt(currentLevel));
+
         setTimeout(() => {
             setIsShowingNumbers(false);
             // Focus sur l'input quand il apparaît  
@@ -213,7 +211,7 @@ export default function NumberMemoryTest() {
                 {isShowingNumbers && (
                     <div className="fixed top-20 left-0 right-0 z-40">
                         <ProgressBar 
-                            duration={3000 + level * 1000} 
+                            duration={1000 + (level * 300 * Math.sqrt(level))} 
                             isActive={isShowingNumbers} 
                         />
                     </div>
