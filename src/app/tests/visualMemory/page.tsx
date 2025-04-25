@@ -28,7 +28,6 @@ ChartJS.register(
 export default function VisualMemoryTest() {
   const [lives, setLives] = useState(2)
   const [level, setLevel] = useState(1)
-  const [score, setScore] = useState(0)
   const [sequence, setSequence] = useState<number[]>([])
   const [userSequence, setUserSequence] = useState<number[]>([])
   const [isShowingSequence, setIsShowingSequence] = useState(false)
@@ -85,7 +84,7 @@ export default function VisualMemoryTest() {
       
       if (newLives <= 0) {
         setGameOver(true)
-        saveResult(score)
+        saveResult(level)
       } else {
         // Attend 500ms avec la tuile rouge visible
         setTimeout(() => {
@@ -101,7 +100,6 @@ export default function VisualMemoryTest() {
       
       if (newUserSequence.length === sequence.length) {
         // Niveau réussi
-        setScore(prev => prev + level)
         setLevel(prev => prev + 1)
         startLevel()
       }
@@ -238,7 +236,7 @@ export default function VisualMemoryTest() {
                   Testez votre mémoire visuelle.
                   Des tuiles vont s'illuminer brièvement à l'écran.
                   Reproduisez la séquence pour passer au niveau suivant.
-                  Vous avez droit à trois erreurs par niveau.
+                  Vous avez droit à 2 erreurs.
                 </p>
               }
               onStart={startGame}
@@ -260,7 +258,6 @@ export default function VisualMemoryTest() {
                       </span>
                     ))}
                   </div>
-                  <div className="text-2xl dark:text-white">Score: {score}</div>
                 </div>
                 {isShowingSequence && (
                   <ProgressBar 
@@ -315,7 +312,6 @@ export default function VisualMemoryTest() {
                         setGameOver(false);
                         setLevel(1);
                         setLives(2);
-                        setScore(0);
                         setSequence([]);
                         setUserSequence([]);
                         setCorrectTiles([]);
