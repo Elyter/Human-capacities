@@ -82,7 +82,12 @@ export default function ReflexTest() {
     }
 
     if (!isWaiting) {
-      resetTest();
+      // Si on a déjà affiché un résultat, on relance directement le test
+      if (reactionTime !== null) {
+        startTest();
+      } else {
+        resetTest();
+      }
       return;
     }
 
@@ -94,7 +99,8 @@ export default function ReflexTest() {
       setBackgroundColor('#EF4444'); // Rouge plus vif
       setTimeout(() => {
         resetTest();
-      }, 2000);
+        startTest(); // Relance automatiquement le test après le délai
+      }, 1500); 
       return;
     }
 
@@ -265,8 +271,24 @@ export default function ReflexTest() {
                 <p className="text-black dark:text-white text-xl">
                   Votre temps de réaction : {reactionTime} ms
                 </p>
-                <p className="mt-2 text-gray-600 dark:text-gray-200">
-                  Cliquez n&apos;importe où pour réessayer
+                <div className="flex justify-center mt-4">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetTest();
+                      setShowStart(true);
+                      setTimeout(() => {
+                        // @ts-ignore
+                        if (window.scrollToReflexStats) window.scrollToReflexStats();
+                      }, 100);
+                    }}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Voir les statistiques
+                  </button>
+                </div>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                  Cliquez n&apos;importe où pour rejouer
                 </p>
               </div>
             )}

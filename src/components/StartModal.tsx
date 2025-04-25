@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useRef, useState, useEffect } from 'react';
 import ModalStats from './ModalStats';
 
 interface StartModalProps {
@@ -25,6 +25,12 @@ export default function StartModal({ title, description, onStart, stats }: Start
       }
     }, 100);
   };
+
+  // Exposer la fonction scrollToStats pour qu'elle puisse être appelée de l'extérieur
+  useEffect(() => {
+    // @ts-ignore
+    window.scrollToReflexStats = scrollToStats;
+  }, []);
 
   return (
     <div className="w-full">
