@@ -15,6 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import StartModal from '@/components/StartModal';
 import ProgressBar from "@/components/ProgressBar";
+import GameOverModal from '@/components/GameOverModal';
 
 ChartJS.register(
   CategoryScale,
@@ -221,6 +222,31 @@ export default function SequenceMemoryTest() {
     }
   };
 
+  const handleRestart = () => {
+    setLevel(1);
+    setLives(2);
+    setGameStatus('playing');
+    setCorrectTiles([]);
+    setErrorTile(null);
+    setUserSequence([]);
+    setSequence([]);
+    setIsShowingSequence(false);
+    const initialSequence = generateSequence(1);
+    setSequence(initialSequence);
+    showSequence(initialSequence);
+  };
+
+  const handleBackToRules = () => {
+    setGameStatus('waiting');
+    setLevel(1);
+    setLives(2);
+    setSequence([]);
+    setUserSequence([]);
+    setCorrectTiles([]);
+    setErrorTile(null);
+    setIsShowingSequence(false);
+  };
+
   return (
     <>
       <Link 
@@ -294,31 +320,13 @@ export default function SequenceMemoryTest() {
         )}
       </div>
 
-      {gameStatus === 'gameover' && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
-            <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
-            <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level - 1}</p>
-            <div className="flex gap-4 justify-center">
-              <button 
-                onClick={() => {
-                  setGameStatus('waiting');
-                  setLevel(1);
-                  setLives(3);
-                  setSequence([]);
-                  setUserSequence([]);
-                  setCorrectTiles([]);
-                  setErrorTile(null);
-                  setIsShowingSequence(false);
-                }}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-              >
-                Retour aux règles
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GameOverModal 
+        isOpen={gameStatus === 'gameover'}
+        score={level - 1}
+        onRestart={handleRestart}
+        onBackToRules={handleBackToRules}
+        scoreLabel="Niveau atteint"
+      />
     </>
   );
 }

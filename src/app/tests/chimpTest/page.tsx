@@ -15,6 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import StartModal from '@/components/StartModal';
 import ProgressBar from "@/components/ProgressBar";
+import GameOverModal from '@/components/GameOverModal';
 
 ChartJS.register(
   CategoryScale,
@@ -249,7 +250,6 @@ export default function ChimpTest() {
     }
   }, [gameStatus, level]);
 
-  // Modifier la fonction pour retourner à l'écran d'accueil
   const handleRestart = () => {
     setGameStatus('waiting');
     setLevel(4);
@@ -260,6 +260,16 @@ export default function ChimpTest() {
     setNumbers([]);
     setCorrectTiles([]);
     setErrorTile(null);
+  };
+
+  const startNewGame = () => {
+    setGameStatus('showing');
+    setLevel(4);
+    setGridSize(4);
+    setStrikes(0);
+    setScore(0);
+    setUserSequence([]);
+    startNewLevel();
   };
 
   return (
@@ -302,7 +312,7 @@ export default function ChimpTest() {
               <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
                 <div className="text-2xl font-medium dark:text-white">Niveau {level - 3}</div>
                 <div className="flex gap-1">
-                  {Array.from({ length: 3 }).map((_, i) => (
+                  {Array.from({ length: 2 }).map((_, i) => (
                     <span key={i} className="text-2xl">
                       {i < strikes ? '🖤' : '❤️'}
                     </span>
@@ -369,20 +379,13 @@ export default function ChimpTest() {
           </>
         )}
 
-        {gameStatus === 'gameover' && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
-              <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
-              <p className="text-xl mb-6 dark:text-gray-200">Niveau atteint : {level - 3}</p>
-              <button 
-                onClick={handleRestart}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-              >
-                Retour à l&apos;accueil
-              </button>
-            </div>
-          </div>
-        )}
+        <GameOverModal 
+          isOpen={gameStatus === 'gameover'}
+          score={level - 3}
+          onRestart={startNewGame}
+          onBackToRules={handleRestart}
+          scoreLabel="Niveau atteint"
+        />
       </div>
     </>
   );

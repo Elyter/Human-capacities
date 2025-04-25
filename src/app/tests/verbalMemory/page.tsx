@@ -14,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import StartModal from '@/components/StartModal';
+import GameOverModal from '@/components/GameOverModal';
 
 ChartJS.register(
   CategoryScale,
@@ -179,6 +180,14 @@ export default function VerbalMemoryTest() {
     choisirNouveauMot();
   };
 
+  const handleRestart = () => {
+    startGame();
+  };
+
+  const handleBackToRules = () => {
+    setGameStatus('waiting');
+  };
+
   return (
     <>
       <Link 
@@ -252,18 +261,13 @@ export default function VerbalMemoryTest() {
         )}
 
         {gameStatus === 'gameover' && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
-              <h2 className="text-2xl font-bold mb-4 dark:text-white">Partie terminée !</h2>
-              <p className="text-xl mb-6 dark:text-gray-200">Score final : {score}</p>
-              <button 
-                onClick={() => setGameStatus('waiting')}
-                className="px-6 py-3 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Retour aux règles
-              </button>
-            </div>
-          </div>
+          <GameOverModal 
+            isOpen={gameStatus === 'gameover'}
+            score={score}
+            onRestart={handleRestart}
+            onBackToRules={handleBackToRules}
+            scoreLabel="Score final"
+          />
         )}
       </div>
     </>
