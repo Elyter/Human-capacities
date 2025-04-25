@@ -14,6 +14,7 @@ import { Line } from 'react-chartjs-2'
 import Link from 'next/link'
 import StartModal from '@/components/StartModal'
 import ProgressBar from "@/components/ProgressBar"
+import GameOverModal from "@/components/GameOverModal"
 
 ChartJS.register(
   CategoryScale,
@@ -330,16 +331,36 @@ export default function TypingSpeed() {
                         ))}
                       </div>
                     </div>
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={currentInput}
-                      onChange={handleInput}
-                      onKeyDown={handleKeyDown}
-                      className="w-full p-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white"
-                      placeholder="Tapez les mots ici..."
-                      disabled={!isStarted}
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={currentInput}
+                        onChange={handleInput}
+                        onKeyDown={handleKeyDown}
+                        className="flex-1 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white"
+                        placeholder="Tapez les mots ici..."
+                        disabled={!isStarted}
+                      />
+                      <button
+                        onClick={() => {
+                          handleStart();
+                          setHasStartedTyping(false);
+                        }}
+                        className="bg-white dark:bg-gray-800 dark:text-white rounded-xl p-4 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+                        title="Redémarrer"
+                      >
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="h-6 w-6" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -347,32 +368,31 @@ export default function TypingSpeed() {
                   <ProgressBar 
                     duration={60000} 
                     isActive={isStarted && !isFinished && hasStartedTyping} 
-                    onComplete={() => {
-                      if (!isFinished) setIsFinished(true);
-                    }}
+                    onComplete={() => {}}
+                    timeLeft={timeLeft}
+                    totalTime={60}
                   />
                 </div>
               </>
             )}
  
-            {isFinished && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center">
-                  <h2 className="text-2xl font-bold mb-4 dark:text-white">Test terminé !</h2>
-                  <p className="text-xl mb-6 dark:text-gray-200">Vitesse finale : {wordCount} mots par minute</p>
-                  <button 
-                    onClick={() => {
-                      setIsFinished(false);
-                      setCurrentWordIndex(0);
-                      setWords([]);
-                    }}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                  >
-                    Retour à l&apos;accueil
-                  </button>
-                </div>
-              </div>
-            )}
+            <GameOverModal
+              isOpen={isFinished}
+              score={wordCount}
+              scoreLabel="Vitesse finale (MPM)"
+              onRestart={() => {
+                handleStart();
+                setIsFinished(false);
+                setHasStartedTyping(false);
+              }}
+              onBackToRules={() => {
+                setIsFinished(false);
+                setCurrentWordIndex(0);
+                setWords([]);
+              }}
+              showRestartButton={true}
+              showBackToRulesButton={true}
+            />
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ import React from 'react';
 
 interface GameOverModalProps {
   isOpen: boolean;
-  score: number;
+  score?: number;
   onRestart: () => void;
   onBackToRules: () => void;
   scoreLabel?: string;
