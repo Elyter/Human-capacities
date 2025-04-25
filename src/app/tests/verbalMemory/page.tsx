@@ -46,6 +46,7 @@ export default function VerbalMemoryTest() {
   const [vies, setVies] = useState<number>(2);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'gameover'>('waiting');
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
+  const [showErrorAnimation, setShowErrorAnimation] = useState<boolean>(false);
 
   useEffect(() => {
     fetchResults();
@@ -133,6 +134,9 @@ export default function VerbalMemoryTest() {
   };
 
   const choisirNouveauMot = () => {
+    // Réinitialiser l'animation d'erreur lorsqu'un nouveau mot est choisi
+    setShowErrorAnimation(false);
+    
     const utiliserMotDejaVu = Math.random() > 0.5 && motsDejaProposes.size > 0;
     
     if (utiliserMotDejaVu) {
@@ -161,15 +165,23 @@ export default function VerbalMemoryTest() {
       if (!estEffectivementDejaVu) {
         setMotsDejaProposes(prev => new Set(prev).add(motCourant));
       }
+      choisirNouveauMot();
     } else {
       setVies(prev => prev - 1);
-      if (vies <= 1) {
-        handleGameOver();
-        return;
-      }
+      setShowErrorAnimation(true);
+      
+      // Attendre que l'animation se termine avant de passer au mot suivant
+      setTimeout(() => {
+        setShowErrorAnimation(false);
+        
+        if (vies <= 1) {
+          handleGameOver();
+          return;
+        }
+        
+        choisirNouveauMot();
+      }, 700); // Délai de 700ms pour l'animation
     }
-    
-    choisirNouveauMot();
   };
 
   const startGame = () => {
@@ -239,8 +251,10 @@ export default function VerbalMemoryTest() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center gap-8 pt-24">
-              <div className="text-4xl font-bold mb-8 dark:text-white">{motCourant}</div>
+            <div className={`flex flex-col items-center justify-center gap-8 pt-24`}>
+              <div className={`text-4xl font-bold mb-8 dark:text-white ${showErrorAnimation ? 'animate-text-flash-with-shake' : ''}`}>
+                {motCourant}
+              </div>
               
               <div className="flex gap-6">
                 <button 

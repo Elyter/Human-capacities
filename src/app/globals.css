@@ -61,3 +61,76 @@ body {
 [style*="backgroundColor"] {
   --game-background-color: var(--background-override, inherit);
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes bounce-once {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-shake {
+  animation: quick-shake 0.7s linear;
+}
+
+.animate-bounce-once {
+  animation: bounce-once 0.8s ease-in-out;
+}
+
+.animate-error {
+  position: relative;
+}
+
+.animate-error::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  border-radius: 16px;
+  animation: pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1);
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.05); }
+}
+
+@keyframes flash-red {
+  0% { background-color: rgba(239, 68, 68, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.animate-flash {
+  animation: flash-red 0.8s ease-out;
+}
+
+@keyframes text-flash-red {
+  0%, 100% { color: rgb(239, 68, 68); }
+}
+
+.animate-text-flash {
+  animation: text-flash-red 0.7s linear;
+}
+
+.animate-text-flash-with-shake {
+  animation: text-flash-red 0.7s linear, quick-shake 0.7s linear;
+}
+
+@keyframes quick-shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-3px); }
+  20% { transform: translateX(3px); }
+  30% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  50% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
+  70% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+  90% { transform: translateX(-3px); }
+  100% { transform: translateX(3px); }
+}
