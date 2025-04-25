@@ -42,7 +42,7 @@ export default function VerbalMemoryTest() {
   const [motsDejaProposes, setMotsDejaProposes] = useState<Set<string>>(new Set());
   const [motCourant, setMotCourant] = useState<string>('');
   const [score, setScore] = useState<number>(0);
-  const [vies, setVies] = useState<number>(3);
+  const [vies, setVies] = useState<number>(2);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'gameover'>('waiting');
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
 
@@ -174,7 +174,7 @@ export default function VerbalMemoryTest() {
   const startGame = () => {
     setGameStatus('playing');
     setScore(0);
-    setVies(3);
+    setVies(2);
     setMotsDejaProposes(new Set());
     choisirNouveauMot();
   };
@@ -205,7 +205,7 @@ export default function VerbalMemoryTest() {
                 Des mots vont apparaître un par un.
                 Si vous avez déjà vu le mot, cliquez sur "VU".
                 Si c'est la première fois que vous voyez le mot, cliquez sur "NOUVEAU".
-                Vous avez trois vies.
+                Vous avez deux vies.
               </p>
             }
             onStart={startGame}
@@ -221,9 +221,9 @@ export default function VerbalMemoryTest() {
               <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
                 <div className="text-2xl dark:text-white">Score: {score}</div>
                 <div className="flex gap-1">
-                  {Array.from({ length: 3 }).map((_, i) => (
+                  {Array.from({ length: 2 }).map((_, i) => (
                     <span key={i} className="text-2xl">
-                      {i < (3 - vies) ? '🖤' : '❤️'}
+                      {i < (2 - vies) ? '🖤' : '❤️'}
                     </span>
                   ))}
                 </div>

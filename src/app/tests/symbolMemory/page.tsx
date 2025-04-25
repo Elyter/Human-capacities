@@ -85,7 +85,7 @@ const chartOptions = {
 
 export default function SymbolMemoryTest() {
   const [level, setLevel] = useState(1);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(2);
   const [cards, setCards] = useState<Array<{ id: number; symbol: string; isFlipped: boolean; isMatched: boolean }>>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'showing' | 'gameover'>('waiting');
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
@@ -109,7 +109,7 @@ export default function SymbolMemoryTest() {
 
   const startGame = () => {
     setLevel(1);
-    setLives(3);
+    setLives(2);
     setGameStatus('showing');
     const initialCards = initializeCards(1);
     setCards(initialCards);
@@ -213,7 +213,7 @@ export default function SymbolMemoryTest() {
   const handleRestart = () => {
     setGameStatus('waiting');
     setLevel(1);
-    setLives(3);
+    setLives(2);
     setSelectedCards([]);
     setCards([]);
   };

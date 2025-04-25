@@ -27,7 +27,7 @@ ChartJS.register(
 
 export default function NumberMemoryTest() {
     const [level, setLevel] = useState(1);
-    const [lives, setLives] = useState(3);
+    const [lives, setLives] = useState(2);
     const [numbers, setNumbers] = useState<string>('');
     const [isShowingNumbers, setIsShowingNumbers] = useState(false);
     const [userInput, setUserInput] = useState('');
@@ -148,7 +148,7 @@ export default function NumberMemoryTest() {
     const startGame = () => {
         setGameStatus('playing');
         setLevel(1);
-        setLives(3);
+        setLives(2);
         startNewLevel(1);
     };
 

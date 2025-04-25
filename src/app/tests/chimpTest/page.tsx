@@ -221,7 +221,7 @@ export default function ChimpTest() {
       setCanClick(false);
       setErrorTile(position);
       setStrikes(prev => prev + 1);
-      if (strikes >= 2) {
+      if (strikes >= 1) {
         setGameStatus('gameover');
       } else {
         setTimeout(() => {
