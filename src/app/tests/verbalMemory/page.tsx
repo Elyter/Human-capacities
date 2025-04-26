@@ -47,6 +47,7 @@ export default function VerbalMemoryTest() {
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'gameover'>('waiting');
   const [results, setResults] = useState<Array<{ timestamp: number; score: number }>>([]);
   const [showErrorAnimation, setShowErrorAnimation] = useState<boolean>(false);
+  const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     fetchResults();
@@ -141,10 +142,23 @@ export default function VerbalMemoryTest() {
     
     if (utiliserMotDejaVu) {
       const motsArray = Array.from(motsDejaProposes);
-      const motAleatoire = motsArray[Math.floor(Math.random() * motsArray.length)];
-      setMotCourant(motAleatoire);
+      // Filtrer pour exclure le mot courant et éviter la répétition
+      const motsDisponibles = motsArray.filter(mot => mot !== motCourant);
+      
+      // Si tous les mots déjà vus sont le mot courant (cas rare mais possible)
+      if (motsDisponibles.length === 0) {
+        // Forcer l'utilisation d'un nouveau mot
+        const nouveauxMots = MOTS_FRANCAIS.filter(mot => !motsDejaProposes.has(mot));
+        if (nouveauxMots.length === 0) return;
+        const nouveauMot = nouveauxMots[Math.floor(Math.random() * nouveauxMots.length)];
+        setMotCourant(nouveauMot);
+      } else {
+        // Choisir un mot aléatoire parmi les mots déjà vus (sauf le mot courant)
+        const motAleatoire = motsDisponibles[Math.floor(Math.random() * motsDisponibles.length)];
+        setMotCourant(motAleatoire);
+      }
     } else {
-      const motsDisponibles = MOTS_FRANCAIS.filter(mot => !motsDejaProposes.has(mot));
+      const motsDisponibles = MOTS_FRANCAIS.filter(mot => !motsDejaProposes.has(mot) && mot !== motCourant);
       if (motsDisponibles.length === 0) return;
       
       const nouveauMot = motsDisponibles[Math.floor(Math.random() * motsDisponibles.length)];
@@ -169,10 +183,12 @@ export default function VerbalMemoryTest() {
     } else {
       setVies(prev => prev - 1);
       setShowErrorAnimation(true);
+      setButtonsDisabled(true);
       
       // Attendre que l'animation se termine avant de passer au mot suivant
       setTimeout(() => {
         setShowErrorAnimation(false);
+        setButtonsDisabled(false);
         
         if (vies <= 1) {
           handleGameOver();
@@ -259,13 +275,15 @@ export default function VerbalMemoryTest() {
               <div className="flex gap-6">
                 <button 
                   onClick={() => handleReponse(true)}
-                  className="px-10 py-5 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95"
+                  disabled={buttonsDisabled}
+                  className={`px-10 py-5 bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl hover:from-indigo-700 hover:to-blue-800 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95 ${buttonsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   DÉJÀ VU
                 </button>
                 <button 
                   onClick={() => handleReponse(false)}
-                  className="px-10 py-5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95"
+                  disabled={buttonsDisabled}
+                  className={`px-10 py-5 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 text-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95 ${buttonsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   NOUVEAU
                 </button>
