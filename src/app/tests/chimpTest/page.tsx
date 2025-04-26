@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
   Chart as ChartJS,
@@ -33,26 +33,214 @@ type TestResult = {
   score: number;
 };
 
-export default function ChimpTest() {
-  const [level, setLevel] = useState(4); // Commence à 4 chiffres
-  const [numbers, setNumbers] = useState<{position: number, value: number}[]>([]);
+type GameStatus = 'waiting' | 'playing' | 'showing' | 'gameover';
+type NumberTile = { position: number, value: number };
+
+// Composant de jeu principal
+function ChimpTestGame({ gameKey, onGameOver }: { gameKey: number, onGameOver: (score: number) => void }) {
+  // États du jeu
+  const [level, setLevel] = useState(4);
+  const [numbers, setNumbers] = useState<NumberTile[]>([]);
   const [userSequence, setUserSequence] = useState<number[]>([]);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'showing' | 'gameover'>('waiting');
+  const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
   const [strikes, setStrikes] = useState(0);
-  const [, setScore] = useState(0);
-  const [gridSize, setGridSize] = useState(4); // Commence avec une grille 4x4
+  const [score, setScore] = useState(0);
+  const [gridSize, setGridSize] = useState(4);
   const [numbersVisible, setNumbersVisible] = useState(true);
+  
+  // États d'interface utilisateur
   const [correctTiles, setCorrectTiles] = useState<number[]>([]);
   const [errorTile, setErrorTile] = useState<number | null>(null);
   const [clickedTile, setClickedTile] = useState<number | null>(null);
-  const [results, setResults] = useState<TestResult[]>([]);
-  const [canClick, setCanClick] = useState(true);
+  const [canClick, setCanClick] = useState(false);
+  
+  // Ajuster la taille de la grille en fonction du niveau
+  useEffect(() => {
+    const levelIndex = level - 4; // Niveau 4 = index 0
+    const shouldIncreaseGrid = levelIndex > 0 && levelIndex % 3 === 0;
+    if (shouldIncreaseGrid) {
+      setGridSize(prev => Math.min(prev + 1, 8)); // Maximum 8x8
+    }
+  }, [level]);
 
+  // Génération d'une séquence aléatoire de nombres
+  const generateSequence = useCallback(() => {
+    const positions = new Set<number>();
+    const sequence: NumberTile[] = [];
+    
+    // Utiliser le niveau actuel comme nombre de chiffres à générer
+    while (positions.size < level) {
+      const pos = Math.floor(Math.random() * (gridSize * gridSize));
+      if (!positions.has(pos)) {
+        positions.add(pos);
+        sequence.push({
+          position: pos,
+          value: positions.size
+        });
+      }
+    }
+    
+    return sequence;
+  }, [level, gridSize]);
+
+  // Démarrage d'un nouveau niveau
+  const startNewLevel = useCallback(() => {
+    const newSequence = generateSequence();
+    setNumbers(newSequence);
+    setUserSequence([]);
+    setNumbersVisible(true);
+    setCorrectTiles([]);
+    setErrorTile(null);
+    setCanClick(true);
+  }, [generateSequence]);
+
+  // Initialiser le jeu au montage
+  useEffect(() => {
+    // Démarrer le premier niveau après un court délai
+    const timer = setTimeout(() => {
+      startNewLevel();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [startNewLevel]);
+
+  // Gestion du clic sur une tuile
+  const handleTileClick = useCallback((position: number) => {
+    if (gameStatus !== 'playing' || !canClick) return;
+
+    setClickedTile(position);
+    setTimeout(() => setClickedTile(null), 200);
+
+    const clickedNumber = numbers.find(n => n.position === position);
+    if (!clickedNumber) return;
+
+    if (clickedNumber.value === 1) {
+      setNumbersVisible(false);
+    }
+
+    const expectedValue = userSequence.length + 1;
+    
+    if (clickedNumber.value === expectedValue) {
+      // Clic correct
+      setCorrectTiles(prev => [...prev, position]);
+      const newSequence = [...userSequence, clickedNumber.value];
+      setUserSequence(newSequence);
+
+      if (newSequence.length === numbers.length) {
+        // Niveau réussi
+        setScore(prev => prev + level);
+        setLevel(prev => prev + 1);
+        
+        // Désactiver les clics pendant la transition
+        setCanClick(false);
+        
+        setTimeout(() => {
+          startNewLevel();
+        }, 500);
+      }
+    } else {
+      // Clic incorrect
+      setCanClick(false);
+      setErrorTile(position);
+      setStrikes(prev => prev + 1);
+      
+      if (strikes >= 1) {
+        // Game over après 2 erreurs
+        setTimeout(() => {
+          setGameStatus('gameover');
+          onGameOver(level - 3);
+        }, 500);
+      } else {
+        // Continuer après une erreur
+        setTimeout(() => {
+          startNewLevel();
+        }, 800);
+      }
+    }
+  }, [gameStatus, canClick, numbers, userSequence, strikes, level, startNewLevel, onGameOver]);
+
+  return (
+    <>
+      <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
+        <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
+          <div className="text-2xl font-medium dark:text-white">Niveau {level - 3}</div>
+          <div className="flex gap-1">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <span key={i} className="text-2xl">
+                {i < strikes ? '🖤' : '❤️'}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center min-h-screen">
+        <div 
+          className="grid gap-2 mx-auto"
+          style={{ 
+            gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+            width: `${gridSize * 80}px`,
+            height: `${gridSize * 80}px`
+          }}
+        >
+          {Array.from({ length: gridSize * gridSize }).map((_, index) => {
+            const number = numbers.find(n => n.position === index);
+            const isCorrect = correctTiles.includes(index);
+            const isError = errorTile === index;
+            const isClicked = clickedTile === index;
+
+            return (
+              <button
+                key={`${gameKey}-tile-${index}`}
+                onClick={() => handleTileClick(index)}
+                className={`
+                  w-16 h-16 rounded-lg transition-all transform duration-200
+                  ${number ? 'bg-blue-500 hover:bg-blue-600 shadow-lg' : 'bg-transparent'}
+                  ${gameStatus === 'playing' && canClick ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
+                  ${isCorrect ? 'bg-green-500 hover:bg-green-600 animate-[pulse_0.5s_ease-in-out]' : ''}
+                  ${isError ? 'bg-red-500 hover:bg-red-600 animate-[bounce_0.5s_ease-in-out]' : ''}
+                  ${isClicked ? 'scale-95' : ''}
+                  relative overflow-hidden flex items-center justify-center
+                `}
+                disabled={!canClick || gameStatus !== 'playing'}
+              >
+                {numbersVisible && number && (
+                  <span className="text-white text-2xl font-bold">
+                    {number.value}
+                  </span>
+                )}
+                {isCorrect && (
+                  <div className="absolute inset-0 bg-green-400 opacity-50 animate-[ping_0.75s_ease-in-out]" />
+                )}
+                {isError && (
+                  <div className="absolute inset-0 bg-red-400 opacity-50 animate-[ping_0.75s_ease-in-out]" />
+                )}
+                {isClicked && !isCorrect && !isError && (
+                  <div className="absolute inset-0 bg-white opacity-30 animate-[ping_0.4s_ease-in-out]" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Composant principal qui gère l'état global
+export default function ChimpTest() {
+  // État global
+  const [gameKey, setGameKey] = useState(Date.now());
+  const [gameStatus, setGameStatus] = useState<GameStatus>('waiting');
+  const [finalScore, setFinalScore] = useState(0);
+  const [results, setResults] = useState<TestResult[]>([]);
+  
   // Charger les résultats au montage du composant
   useEffect(() => {
     fetchResults();
   }, []);
 
+  // Fonction pour récupérer les résultats depuis l'API
   const fetchResults = async () => {
     try {
       const response = await fetch('/api/chimpTest');
@@ -63,6 +251,7 @@ export default function ChimpTest() {
     }
   };
 
+  // Fonction pour sauvegarder un résultat
   const saveResult = async (score: number) => {
     try {
       await fetch('/api/chimpTest', {
@@ -79,8 +268,8 @@ export default function ChimpTest() {
     }
   };
 
-  const prepareChartData = () => {
-    // Créer les intervalles de score (4 à 12 par exemple)
+  // Préparation des données pour le graphique
+  const prepareChartData = useCallback(() => {
     const intervals = Array.from({ length: 9 }, (_, i) => i + 4);
     const counts = new Array(intervals.length).fill(0);
     
@@ -91,7 +280,6 @@ export default function ChimpTest() {
       }
     });
 
-    // Convertir en pourcentages
     const total = results.length;
     const percentages = counts.map(count => (count / total) * 100 || 0);
 
@@ -107,8 +295,9 @@ export default function ChimpTest() {
         }
       ]
     };
-  };
+  }, [results]);
 
+  // Options du graphique
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -138,139 +327,24 @@ export default function ChimpTest() {
     }
   };
 
-  // Ajuster la taille de la grille en fonction du niveau
-  useEffect(() => {
-    const levelIndex = level - 4; // Niveau 4 = index 0
-    const shouldIncreaseGrid = levelIndex > 0 && levelIndex % 3 === 0;
-    if (shouldIncreaseGrid) {
-      setGridSize(prev => Math.min(prev + 1, 8)); // Maximum 8x8
-    }
-  }, [level]);
-
-  const generateSequence = () => {
-    const positions = new Set<number>();
-    const sequence: {position: number, value: number}[] = [];
-    
-    // Utiliser le niveau actuel comme nombre de chiffres à générer
-    while (positions.size < level) {
-      const pos = Math.floor(Math.random() * (gridSize * gridSize));
-      if (!positions.has(pos)) {
-        positions.add(pos);
-        sequence.push({
-          position: pos,
-          value: positions.size
-        });
-      }
-    }
-    
-    return sequence;
-  };
-
-  const startGame = () => {
-    setLevel(4); // Commence avec 4 chiffres
-    setGridSize(4); // Réinitialise à une grille 4x4
-    setStrikes(0);
-    setScore(0);
+  // Démarrer une nouvelle partie
+  const startGame = useCallback(() => {
+    setGameKey(Date.now()); // Forcer la recréation complète du composant de jeu
     setGameStatus('playing');
-    setCanClick(true);
-    startNewLevel();
-  };
+  }, []);
 
-  const startNewLevel = () => {
-    const newSequence = generateSequence();
-    setNumbers(newSequence);
-    setUserSequence([]);
+  // Gérer la fin de partie
+  const handleGameOver = useCallback((score: number) => {
+    setFinalScore(score);
+    setGameStatus('gameover');
+    saveResult(score);
+  }, []);
+
+  // Redémarrer le jeu
+  const handleRestart = useCallback(() => {
+    setGameKey(Date.now()); // Forcer la recréation complète du composant de jeu
     setGameStatus('playing');
-    setNumbersVisible(true);
-    setCorrectTiles([]);
-    setErrorTile(null);
-    setCanClick(true);
-  };
-
-  const handleTileClick = (position: number) => {
-    if (gameStatus !== 'playing' || !canClick) return;
-
-    setClickedTile(position);
-    setTimeout(() => setClickedTile(null), 200);
-
-    const clickedNumber = numbers.find(n => n.position === position);
-    if (!clickedNumber) return;
-
-    if (clickedNumber.value === 1) {
-      setNumbersVisible(false);
-    }
-
-    const expectedValue = userSequence.length + 1;
-    
-    if (clickedNumber.value === expectedValue) {
-      setCorrectTiles(prev => [...prev, position]);
-      const newSequence = [...userSequence, clickedNumber.value];
-      setUserSequence(newSequence);
-
-      if (newSequence.length === numbers.length) {
-        // Niveau réussi
-        setScore(prev => prev + level); // Score basé sur le nombre de chiffres
-        setLevel(prev => prev + 1); // Augmente le nombre de chiffres
-        setTimeout(() => {
-          startNewLevel();
-          setNumbersVisible(true);
-          setCorrectTiles([]);
-        }, 500);
-      }
-    } else {
-      // Désactive les clics pendant l'animation d'erreur
-      setCanClick(false);
-      setErrorTile(position);
-      setStrikes(prev => prev + 1);
-      if (strikes >= 1) {
-        setGameStatus('gameover');
-      } else {
-        setTimeout(() => {
-          startNewLevel();
-          setNumbersVisible(true);
-          setCorrectTiles([]);
-          setErrorTile(null);
-          setCanClick(true); // Réactive les clics
-        }, 500);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (gameStatus === 'showing') {
-      setTimeout(() => {
-        setGameStatus('playing');
-      }, 3000);
-    }
-  }, [gameStatus]);
-
-  useEffect(() => {
-    if (gameStatus === 'gameover') {
-      saveResult(level - 3);
-    }
-  }, [gameStatus, level]);
-
-  const handleRestart = () => {
-    setGameStatus('waiting');
-    setLevel(4);
-    setGridSize(4);
-    setStrikes(0);
-    setScore(0);
-    setUserSequence([]);
-    setNumbers([]);
-    setCorrectTiles([]);
-    setErrorTile(null);
-  };
-
-  const startNewGame = () => {
-    setGameStatus('showing');
-    setLevel(4);
-    setGridSize(4);
-    setStrikes(0);
-    setScore(0);
-    setUserSequence([]);
-    startNewLevel();
-  };
+  }, []);
 
   return (
     <>
@@ -306,84 +380,20 @@ export default function ChimpTest() {
               <p className="text-center dark:text-gray-200">Aucune donnée disponible pour le moment.</p>
             )}
           />
-        ) : (
-          <>
-            <div className="fixed top-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg z-40">
-              <div className="max-w-screen-xl mx-auto h-full flex items-center justify-center gap-8">
-                <div className="text-2xl font-medium dark:text-white">Niveau {level - 3}</div>
-                <div className="flex gap-1">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <span key={i} className="text-2xl">
-                      {i < strikes ? '🖤' : '❤️'}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center min-h-screen">
-              <div 
-                className="grid gap-2 mx-auto"
-                style={{ 
-                  gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                  width: `${gridSize * 80}px`,
-                  height: `${gridSize * 80}px`
-                }}
-              >
-                {Array.from({ length: gridSize * gridSize }).map((_, index) => {
-                  const number = numbers.find(n => n.position === index);
-                  const isCorrect = correctTiles.includes(index);
-                  const isError = errorTile === index;
-                  const isClicked = clickedTile === index;
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleTileClick(index)}
-                      className={`
-                        w-16 h-16 rounded-lg transition-all transform duration-200
-                        ${number ? 'bg-blue-500 hover:bg-blue-600 shadow-lg' : 'bg-transparent'}
-                        ${gameStatus === 'playing' ? 'cursor-pointer hover:scale-105' : ''}
-                        ${isCorrect ? 'bg-green-500 hover:bg-green-600 animate-[pulse_0.5s_ease-in-out]' : ''}
-                        ${isError ? 'bg-red-500 hover:bg-red-600 animate-[bounce_0.5s_ease-in-out]' : ''}
-                        ${isClicked ? 'scale-95' : ''}
-                        relative overflow-hidden flex items-center justify-center
-                      `}
-                    >
-                      {numbersVisible && number && (
-                        <span className="text-white text-2xl font-bold">
-                          {number.value}
-                        </span>
-                      )}
-                      {isCorrect && (
-                        <div className="absolute inset-0 bg-green-400 opacity-50 animate-[ping_0.75s_ease-in-out]" />
-                      )}
-                      {isError && (
-                        <div className="absolute inset-0 bg-red-400 opacity-50 animate-[ping_0.75s_ease-in-out]" />
-                      )}
-                      {isClicked && !isCorrect && !isError && (
-                        <div className="absolute inset-0 bg-white opacity-30 animate-[ping_0.4s_ease-in-out]" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {gameStatus === 'showing' && (
-              <ProgressBar 
-                duration={3000} 
-                isActive={gameStatus === 'showing'} 
-              />
-            )}
-          </>
-        )}
+        ) : gameStatus === 'playing' ? (
+          <ChimpTestGame 
+            key={gameKey} 
+            gameKey={gameKey} 
+            onGameOver={handleGameOver} 
+          />
+        ) : null}
 
         <GameOverModal 
+          key={`game-over-${gameKey}`}
           isOpen={gameStatus === 'gameover'}
-          score={level - 3}
-          onRestart={startNewGame}
-          onBackToRules={handleRestart}
+          score={finalScore}
+          onRestart={handleRestart}
+          onBackToRules={() => setGameStatus('waiting')}
           scoreLabel="Niveau atteint"
         />
       </div>
